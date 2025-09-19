@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Eigen/Dense>
+#include "Eigen/Dense"
 
 // Fonction qui implémente Runge-Kutta 4 pour un système d'équations
 template<typename T, typename F>

@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/plasma1d.dir/src/main.cpp.o -o plasma1d 
