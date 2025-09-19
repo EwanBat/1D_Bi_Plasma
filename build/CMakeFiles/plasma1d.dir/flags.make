@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/seten/code_copy/1D_Bi_Plasma/include
+CXX_INCLUDES = -I/home/setenoi/1D_Bi_Plasma/include
 
 CXX_FLAGS = -std=gnu++17
 

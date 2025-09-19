@@ -1,4 +1,4 @@
-# Install script for directory: /home/seten/code_copy/1D_Bi_Plasma
+# Install script for directory: /home/setenoi/1D_Bi_Plasma
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/seten/code_copy/1D_Bi_Plasma/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/setenoi/1D_Bi_Plasma/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
