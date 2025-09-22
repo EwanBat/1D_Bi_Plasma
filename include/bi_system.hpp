@@ -112,4 +112,10 @@ class bi_system{
                 }
             }
         }
+
+        void clear_system() {
+            m_electron.clear_perturbation();
+            m_ion.clear_perturbation();
+            m_field.clear_perturbation();
+        }
 };

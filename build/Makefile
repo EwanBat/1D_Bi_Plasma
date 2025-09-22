@@ -129,6 +129,30 @@ plasma1d/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/plasma1d.dir/build.make CMakeFiles/plasma1d.dir/build
 .PHONY : plasma1d/fast
 
+src/fourier.o: src/fourier.cpp.o
+.PHONY : src/fourier.o
+
+# target to build an object file
+src/fourier.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/plasma1d.dir/build.make CMakeFiles/plasma1d.dir/src/fourier.cpp.o
+.PHONY : src/fourier.cpp.o
+
+src/fourier.i: src/fourier.cpp.i
+.PHONY : src/fourier.i
+
+# target to preprocess a source file
+src/fourier.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/plasma1d.dir/build.make CMakeFiles/plasma1d.dir/src/fourier.cpp.i
+.PHONY : src/fourier.cpp.i
+
+src/fourier.s: src/fourier.cpp.s
+.PHONY : src/fourier.s
+
+# target to generate assembly for a file
+src/fourier.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/plasma1d.dir/build.make CMakeFiles/plasma1d.dir/src/fourier.cpp.s
+.PHONY : src/fourier.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -162,6 +186,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... plasma1d"
+	@echo "... src/fourier.o"
+	@echo "... src/fourier.i"
+	@echo "... src/fourier.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

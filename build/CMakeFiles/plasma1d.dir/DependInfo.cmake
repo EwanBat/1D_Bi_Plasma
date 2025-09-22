@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/setenoi/1D_Bi_Plasma/src/fourier.cpp" "CMakeFiles/plasma1d.dir/src/fourier.cpp.o" "gcc" "CMakeFiles/plasma1d.dir/src/fourier.cpp.o.d"
   "/home/setenoi/1D_Bi_Plasma/src/main.cpp" "CMakeFiles/plasma1d.dir/src/main.cpp.o" "gcc" "CMakeFiles/plasma1d.dir/src/main.cpp.o.d"
   )
 

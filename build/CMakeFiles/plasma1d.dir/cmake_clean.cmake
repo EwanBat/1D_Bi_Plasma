@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/plasma1d.dir/src/fourier.cpp.o"
+  "CMakeFiles/plasma1d.dir/src/fourier.cpp.o.d"
   "CMakeFiles/plasma1d.dir/src/main.cpp.o"
   "CMakeFiles/plasma1d.dir/src/main.cpp.o.d"
   "plasma1d"
