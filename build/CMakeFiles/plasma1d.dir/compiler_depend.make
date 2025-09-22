@@ -190,10 +190,10 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
   /home/setenoi/1D_Bi_Plasma/include/Eigen/src/misc/Image.h \
   /home/setenoi/1D_Bi_Plasma/include/Eigen/src/misc/Kernel.h \
   /home/setenoi/1D_Bi_Plasma/include/Eigen/src/misc/RealSvd2x2.h \
+  /home/setenoi/1D_Bi_Plasma/include/bi_system.hpp \
   /home/setenoi/1D_Bi_Plasma/include/constants.hpp \
   /home/setenoi/1D_Bi_Plasma/include/field.hpp \
   /home/setenoi/1D_Bi_Plasma/include/plasma.hpp \
-  /home/setenoi/1D_Bi_Plasma/include/system.hpp \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
@@ -214,7 +214,6 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
   /usr/include/c++/13/bits/basic_string.tcc \
   /usr/include/c++/13/bits/char_traits.h \
   /usr/include/c++/13/bits/charconv.h \
-  /usr/include/c++/13/bits/codecvt.h \
   /usr/include/c++/13/bits/concept_check.h \
   /usr/include/c++/13/bits/cpp_type_traits.h \
   /usr/include/c++/13/bits/cxxabi_forced.h \
@@ -224,7 +223,6 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
   /usr/include/c++/13/bits/exception.h \
   /usr/include/c++/13/bits/exception_defines.h \
   /usr/include/c++/13/bits/exception_ptr.h \
-  /usr/include/c++/13/bits/fstream.tcc \
   /usr/include/c++/13/bits/functexcept.h \
   /usr/include/c++/13/bits/functional_hash.h \
   /usr/include/c++/13/bits/hash_bytes.h \
@@ -303,7 +301,6 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
   /usr/include/c++/13/ext/numeric_traits.h \
   /usr/include/c++/13/ext/string_conversions.h \
   /usr/include/c++/13/ext/type_traits.h \
-  /usr/include/c++/13/fstream \
   /usr/include/c++/13/functional \
   /usr/include/c++/13/initializer_list \
   /usr/include/c++/13/ios \
@@ -438,10 +435,8 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
   /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/atomic_word.h \
-  /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
-  /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/cpu_defines.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h \
@@ -488,8 +483,6 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
 /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/cpu_defines.h:
-
-/usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h:
 
 /usr/include/x86_64-linux-gnu/bits/xopen_lim.h:
 
@@ -611,8 +604,6 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
 
 /usr/include/ctype.h:
 
-/usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h:
-
 /usr/include/c++/13/typeinfo:
 
 /usr/include/c++/13/type_traits:
@@ -660,6 +651,8 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
 /usr/include/c++/13/iosfwd:
 
 /usr/include/c++/13/ios:
+
+/usr/include/c++/13/ext/type_traits.h:
 
 /usr/include/c++/13/ext/string_conversions.h:
 
@@ -711,10 +704,6 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
 
 /usr/include/c++/13/bits/stl_tempbuf.h:
 
-/usr/include/stdio.h:
-
-/usr/include/c++/13/bits/stl_iterator_base_types.h:
-
 /home/setenoi/1D_Bi_Plasma/include/Eigen/src/Core/products/TriangularSolverMatrix.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
@@ -738,8 +727,6 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
 /usr/include/c++/13/bits/enable_special_members.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/13/include/xmmintrin.h:
-
-/usr/include/c++/13/fstream:
 
 /home/setenoi/1D_Bi_Plasma/include/Eigen/src/Core/functors/NullaryFunctors.h:
 
@@ -836,10 +823,6 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
 /home/setenoi/1D_Bi_Plasma/include/Eigen/src/Core/Transpositions.h:
 
 /home/setenoi/1D_Bi_Plasma/include/Eigen/src/Core/NumTraits.h:
-
-/usr/include/c++/13/ext/type_traits.h:
-
-/home/setenoi/1D_Bi_Plasma/include/system.hpp:
 
 /home/setenoi/1D_Bi_Plasma/include/Eigen/src/Core/NoAlias.h:
 
@@ -1121,8 +1104,6 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
 
 /home/setenoi/1D_Bi_Plasma/include/Eigen/src/misc/Image.h:
 
-/usr/include/c++/13/bits/fstream.tcc:
-
 /usr/include/x86_64-linux-gnu/bits/time.h:
 
 /usr/include/x86_64-linux-gnu/bits/select.h:
@@ -1235,13 +1216,15 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
 
 /home/setenoi/1D_Bi_Plasma/include/Eigen/src/SVD/SVDBase.h:
 
-/usr/include/c++/13/bits/stl_iterator_base_funcs.h:
-
-/usr/include/asm-generic/errno-base.h:
+/home/setenoi/1D_Bi_Plasma/include/bi_system.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
 
 /usr/include/asm-generic/errno.h:
+
+/usr/include/asm-generic/errno-base.h:
+
+/usr/include/c++/13/bits/stl_iterator_base_funcs.h:
 
 /home/setenoi/1D_Bi_Plasma/include/Eigen/src/Core/CoreEvaluators.h:
 
@@ -1288,8 +1271,6 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
 /usr/include/c++/13/bits/char_traits.h:
 
 /usr/include/c++/13/bits/hashtable_policy.h:
-
-/usr/include/c++/13/bits/codecvt.h:
 
 /home/setenoi/1D_Bi_Plasma/include/Eigen/src/Core/MapBase.h:
 
@@ -1384,3 +1365,7 @@ CMakeFiles/plasma1d.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp 
 /usr/include/c++/13/bits/stl_algo.h:
 
 /usr/include/c++/13/bits/stl_construct.h:
+
+/usr/include/stdio.h:
+
+/usr/include/c++/13/bits/stl_iterator_base_types.h:
