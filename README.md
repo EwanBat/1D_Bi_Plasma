@@ -1,7 +1,6 @@
 # 1D Two-Fluid + Maxwell Plasma Simulation (C++ / Eigen)
-# 1D Two-Fluid + Maxwell Plasma Simulation (C++ / Eigen)
 
-## 📖 Description
+## Description
 
 This project implements a **1D spectral simulation** of a collisionless plasma described by the **two-fluid model (ions + electrons)** coupled with **Maxwell’s equations**.  
 It evolves the perturbations in Fourier space and reconstructs the physical fields in real space.  
@@ -9,7 +8,7 @@ Post-processing (plots, dispersion analysis) is done in Python.
 
 ---
 
-## ⚡ Governing Equations
+## Governing Equations
 
 We consider small perturbations around a homogeneous, neutral plasma with no background magnetic field.  
 The two-fluid + Maxwell system (linearized) reads:
@@ -31,21 +30,21 @@ where \(s\) is the species index (electrons \(e\), ions \(i\)).
 
 ### Maxwell equations (1D geometry)
 - Longitudinal (electrostatic):
-$'
+$
 i k \delta E_x = \frac{e}{\varepsilon_0}(\delta n_i - \delta n_e).
-'$
+$
 
 - Transverse (electromagnetic):
-$'
+$
 \partial_t \delta E_y = c^2 \partial_x \delta B_z - \frac{1}{\varepsilon_0} \sum_s q_s n_{0s} \delta u_{s,y},
-'$
-$'
+$
+$
 \partial_t \delta B_z = - \partial_x \delta E_y.
-'$
+$
 
 ---
 
-## 📐 Matrix Formulation
+## Matrix Formulation
 
 For each Fourier mode \(k\), the system can be written as:
 
