@@ -1,4 +1,5 @@
 # 1D Two-Fluid + Maxwell Plasma Simulation (C++ / Eigen)
+# 1D Two-Fluid + Maxwell Plasma Simulation (C++ / Eigen)
 
 ## 📖 Description
 
