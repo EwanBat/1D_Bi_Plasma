@@ -15,24 +15,24 @@ The two-fluid + Maxwell system (linearized) reads:
 
 ### Continuity equations
 $$
-\partial_t \,\delta n_s + n_{0s}\,\partial_x \delta u_{s,x} = 0, \quad s \in \{e,i\}
+\partial_t \delta n_s + n_{0s} \partial_x \delta u_{s,x} = 0, \quad s \in \{e,i\}
 $$
 
 ### Momentum equations
 $$
-m_s \partial_t \,\delta u_{s,x} = q_s \delta E_x,
+m_s \partial_t \delta u_{s,x} = q_s \delta E_x,
 $$
 $$
-m_s \partial_t \,\delta u_{s,\perp} = q_s (\delta \mathbf{E}_\perp + \delta \mathbf{u}_{s,\perp}\times \mathbf{B}),
+m_s \partial_t \delta u_{s,\perp} = q_s (\delta \mathbf{E}_\perp + \delta \mathbf{u}_{s,\perp}\times \mathbf{B}),
 $$
 
 where \(s\) is the species index (electrons \(e\), ions \(i\)).
 
 ### Maxwell equations (1D geometry)
 - Longitudinal (electrostatic):
-$
+\
 i k \delta E_x = \frac{e}{\varepsilon_0}(\delta n_i - \delta n_e).
-$
+\
 
 - Transverse (electromagnetic):
 $$
