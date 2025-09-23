@@ -14,33 +14,33 @@ We consider small perturbations around a homogeneous, neutral plasma with no bac
 The two-fluid + Maxwell system (linearized) reads:
 
 ### Continuity equations
-\[
+$$
 \partial_t \,\delta n_s + n_{0s}\,\partial_x \delta u_{s,x} = 0, \quad s \in \{e,i\}
-\]
+$$
 
 ### Momentum equations
-\[
+$$
 m_s \partial_t \,\delta u_{s,x} = q_s \delta E_x,
-\]
-\[
+$$$
+$$
 m_s \partial_t \,\delta u_{s,\perp} = q_s (\delta \mathbf{E}_\perp + \delta \mathbf{u}_{s,\perp}\times \mathbf{B}),
-\]
+$$
 
 where \(s\) is the species index (electrons \(e\), ions \(i\)).
 
 ### Maxwell equations (1D geometry)
 - Longitudinal (electrostatic):
-\[
+$$
 i k \delta E_x = \frac{e}{\varepsilon_0}(\delta n_i - \delta n_e).
-\]
+$$
 
 - Transverse (electromagnetic):
-\[
+$$
 \partial_t \delta E_y = c^2 \partial_x \delta B_z - \frac{1}{\varepsilon_0} \sum_s q_s n_{0s} \delta u_{s,y},
-\]
-\[
+$$
+$$
 \partial_t \delta B_z = - \partial_x \delta E_y.
-\]
+$$
 
 ---
 
@@ -48,13 +48,13 @@ i k \delta E_x = \frac{e}{\varepsilon_0}(\delta n_i - \delta n_e).
 
 For each Fourier mode \(k\), the system can be written as:
 
-\[
+$$
 \frac{d}{dt} \mathbf{y}(k,t) = A(k)\,\mathbf{y}(k,t).
-\]
+$$
 
 ### Longitudinal block (electrostatic, variables \(\delta n_e, u_{e,x}, \delta n_i, u_{i,x}\)):
 
-\[
+$$
 \mathbf{y}_L = 
 \begin{bmatrix}
 \delta n_e \\
@@ -62,9 +62,9 @@ u_{e,x} \\
 \delta n_i \\
 u_{i,x}
 \end{bmatrix},
-\]
+$$
 
-\[
+$$
 A_L(k) =
 \begin{bmatrix}
 0 & -ik n_{0e} & 0 & 0 \\
@@ -72,7 +72,7 @@ A_L(k) =
 0 & 0 & 0 & -ik n_{0i} \\
 -\frac{e}{m_i \varepsilon_0}\frac{1}{ik} & 0 & \frac{e}{m_i \varepsilon_0}\frac{1}{ik} & 0
 \end{bmatrix}.
-\]
+$$
 
 This reproduces Langmuir and ion-acoustic modes.
 
@@ -80,7 +80,7 @@ This reproduces Langmuir and ion-acoustic modes.
 
 ### Transverse block (electromagnetic, variables \(u_{e,y}, u_{i,y}, E_y, B_z\)):
 
-\[
+$$
 \mathbf{y}_T =
 \begin{bmatrix}
 u_{e,y} \\
@@ -88,9 +88,9 @@ u_{i,y} \\
 E_y \\
 B_z
 \end{bmatrix},
-\]
+$$
 
-\[
+$$
 A_T(k) =
 \begin{bmatrix}
 0 & 0 & -\tfrac{e}{m_e} & 0 \\
@@ -98,12 +98,12 @@ A_T(k) =
 -\tfrac{e n_{0e}}{\varepsilon_0} & \tfrac{e n_{0i}}{\varepsilon_0} & 0 & i c^2 k \\
 0 & 0 & -i k & 0
 \end{bmatrix}.
-\]
+$$
 
 This reproduces electromagnetic plasma waves with dispersion
-\[
+$$
 \omega^2 = \omega_p^2 + c^2 k^2.
-\]
+$$
 
 ---
 
