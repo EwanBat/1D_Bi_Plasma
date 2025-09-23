@@ -21,7 +21,7 @@ $$
 ### Momentum equations
 $$
 m_s \partial_t \,\delta u_{s,x} = q_s \delta E_x,
-$$$
+$$
 $$
 m_s \partial_t \,\delta u_{s,\perp} = q_s (\delta \mathbf{E}_\perp + \delta \mathbf{u}_{s,\perp}\times \mathbf{B}),
 $$
@@ -30,9 +30,9 @@ where \(s\) is the species index (electrons \(e\), ions \(i\)).
 
 ### Maxwell equations (1D geometry)
 - Longitudinal (electrostatic):
-$$
+$
 i k \delta E_x = \frac{e}{\varepsilon_0}(\delta n_i - \delta n_e).
-$$
+$
 
 - Transverse (electromagnetic):
 $$
@@ -52,7 +52,7 @@ $$
 \frac{d}{dt} \mathbf{y}(k,t) = A(k)\,\mathbf{y}(k,t).
 $$
 
-### Longitudinal block (electrostatic, variables \(\delta n_e, u_{e,x}, \delta n_i, u_{i,x}\)):
+### Longitudinal block (electrostatic, variables ($\delta n_e, u_{e,x}, \delta n_i, u_{i,x})$):
 
 $$
 \mathbf{y}_L = 
@@ -78,7 +78,7 @@ This reproduces Langmuir and ion-acoustic modes.
 
 ---
 
-### Transverse block (electromagnetic, variables \(u_{e,y}, u_{i,y}, E_y, B_z\)):
+### Transverse block (electromagnetic, variables $(u_{e,y}, u_{i,y}, E_y, B_z)$):
 
 $$
 \mathbf{y}_T =
