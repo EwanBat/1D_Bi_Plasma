@@ -89,6 +89,7 @@ class bi_system{
             const int Tstep = ((tf - t0) / dt) + 1;
             const int Nkx = ((kxf - kxi) / dkx) + 1;
 
+            Eigen::Vector4cd result_rk4;
             for (int idx = 0; idx < Nkx; idx++) {
                 double kx = kxi + idx * dkx;
                 update_matrices(kx);
@@ -97,18 +98,18 @@ class bi_system{
                     update_vectors(idx, step);
 
                     // Update longitudinal perturbations
-                    longitudinal_vector = rk4_step(longitudinal_matrix, longitudinal_vector, dt);
-                    m_electron.get_n1()(idx, step + 1) = longitudinal_vector(0);
-                    m_electron.get_U1()[0](idx, step + 1) = longitudinal_vector(1);
-                    m_ion.get_n1()(idx, step + 1) = longitudinal_vector(2);
-                    m_ion.get_U1()[0](idx, step + 1) = longitudinal_vector(3);
+                    result_rk4 = rk4_step(longitudinal_matrix, longitudinal_vector, dt);
+                    m_electron.get_n1()(idx, step + 1) = result_rk4(0);
+                    m_electron.get_U1()[0](idx, step + 1) = result_rk4(1);
+                    m_ion.get_n1()(idx, step + 1) = result_rk4(2);
+                    m_ion.get_U1()[0](idx, step + 1) = result_rk4(3);
 
                     // Update transverse perturbations
-                    transverse_vector = rk4_step(transverse_matrix, transverse_vector, dt);
-                    m_electron.get_U1()[1](idx, step + 1) = transverse_vector(0);
-                    m_ion.get_U1()[1](idx, step + 1) = transverse_vector(1);
-                    m_field.get_E1()(idx, step + 1) = transverse_vector(2);
-                    m_field.get_B1()(idx, step + 1) = transverse_vector(3);
+                    result_rk4 = rk4_step(transverse_matrix, transverse_vector, dt);
+                    m_electron.get_U1()[1](idx, step + 1) = result_rk4(0);
+                    m_ion.get_U1()[1](idx, step + 1) = result_rk4(1);
+                    m_field.get_E1()(idx, step + 1) = result_rk4(2);
+                    m_field.get_B1()(idx, step + 1) = result_rk4(3);
                 }
             }
         }
