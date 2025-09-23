@@ -30,17 +30,17 @@ where \(s\) is the species index (electrons \(e\), ions \(i\)).
 
 ### Maxwell equations (1D geometry)
 - Longitudinal (electrostatic):
-$$
+$`
 i k \delta E_x = \frac{e}{\varepsilon_0}(\delta n_i - \delta n_e).
-$$
+$`
 
 - Transverse (electromagnetic):
-$$
+$`
 \partial_t \delta E_y = c^2 \partial_x \delta B_z - \frac{1}{\varepsilon_0} \sum_s q_s n_{0s} \delta u_{s,y},
-$$
-$$
+$`
+$`
 \partial_t \delta B_z = - \partial_x \delta E_y.
-$$
+$`
 
 ---
 
@@ -78,7 +78,7 @@ This reproduces Langmuir and ion-acoustic modes.
 
 ---
 
-### Transverse block (electromagnetic, variables $'(u_{e,y}, u_{i,y}, E_y, B_z)'$):
+### Transverse block (electromagnetic, variables $`(u_{e,y}, u_{i,y}, E_y, B_z)`$):
 
 $$
 \mathbf{y}_T =
@@ -101,9 +101,9 @@ A_T(k) =
 $$
 
 This reproduces electromagnetic plasma waves with dispersion
-$$
+$`
 \omega^2 = \omega_p^2 + c^2 k^2.
-$$
+$`
 
 ---
 
