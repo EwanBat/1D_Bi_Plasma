@@ -19,7 +19,7 @@ const double qi = consts::e; // Ion charge in C
 const double me = consts::me; // Electron mass in kg
 const double mi = consts::mp; // Ion mass in kg (proton mass)
 
-void save_vector_to_txt(const std::vector<double>& vec, const std::string& filename) {
+void save_vector_to_txt(std::vector<double>& vec, const std::string& filename) {
     std::ofstream file(filename);
     if (file.is_open()) {
         for (const auto& value : vec) {
@@ -31,7 +31,7 @@ void save_vector_to_txt(const std::vector<double>& vec, const std::string& filen
     }
 }
 
-void save_matrix_to_txt(const Eigen::MatrixXd& matrix, const std::string& filename) {
+void save_matrix_to_txt(Eigen::MatrixXd& matrix, const std::string& filename) {
     std::ofstream file(filename);
     if (file.is_open()) {
         for (int i = 0; i < matrix.rows(); ++i) {
@@ -66,12 +66,12 @@ int main() {
     for (int i = 0; i < Nkx; ++i) {kx_grid[i] = kxi + i * dkx;}
     std::cout << "Number of kx steps: " << Nkx << std::endl;
 
-    double x0 = 0.0; // Minimum position in m
+    double x0 = -2.0 * M_PI / kxi; // Minimum position in m
     double xf = 2.0 * M_PI / kxi; // Maximum position in m
     double dx = 2.0 * M_PI / (Nkx * dkx); // Position step in m
     const int Nx = ((xf - x0) / dx) + 1; // Number of position steps
-    std::vector<double> x_grid(Nkx);
-    for (int i = 0; i < Nx; ++i) {x_grid[i] = i * dx;}
+    std::vector<double> x_grid(Nx);
+    for (int i = 0; i < Nx; ++i) {x_grid[i] = x0 + i * dx;}
     std::cout << "Number of x steps: " << Nx << std::endl;
     
     save_vector_to_txt(t_grid, "../data/t_grid.txt");
@@ -108,6 +108,7 @@ int main() {
     std::vector<Eigen::MatrixXd> U1e_real(2), U1i_real(2);
     U1e_real[0].resize(Nx, Nt); U1e_real[0].setZero(); U1e_real[1].resize(Nx, Nt); U1e_real[1].setZero();
     U1i_real[0].resize(Nx, Nt); U1i_real[0].setZero(); U1i_real[1].resize(Nx, Nt); U1i_real[1].setZero();
+
 
     inverse_fourier_transform(system.m_electron.m_n1, n1e_real, t_grid, kx_grid, x_grid);
     inverse_fourier_transform(system.m_ion.m_n1, n1i_real, t_grid, kx_grid, x_grid);

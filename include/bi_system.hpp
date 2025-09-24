@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include "Eigen/Dense"
 #include "Eigen/src/Core/Matrix.h"
 
@@ -79,7 +80,7 @@ class bi_system{
             omega_i = m_ion.get_n0() * m_ion.get_q()*m_ion.get_q() / (m_ion.get_m()*consts::epsilon0);
             cs_e = consts::kB * m_electron.get_T() / m_electron.get_m();
             cs_i = consts::kB * m_ion.get_T() / m_ion.get_m();
-
+            
             m_electron.resize_perturbation(Nkx, Tstep);
             m_ion.resize_perturbation(Nkx, Tstep);
             m_field.resize_perturbation(Nkx, Tstep);
