@@ -12,13 +12,12 @@ class plasma{
         double m_n0, m_q, m_m, m_T;
 
         // Setters and getters
-        std::vector<Eigen::MatrixXcd>& set_U1(const std::vector<Eigen::MatrixXcd>& U1){ m_U1 = U1; return m_U1; }
-        Eigen::MatrixXcd& set_n1(const Eigen::MatrixXcd& n1){ m_n1 = n1; return m_n1; }
-
-        double& set_n0(const double& n0){ m_n0 = n0; return m_n0; }
-        double& set_q(const double& q){ m_q = q; return m_q; }
-        double& set_m(const double& m){ m_m = m; return m_m; }
-        double& set_T(const double& T){ m_T = T; return m_T; }
+        void set_U1_at(int i, int j, int component, std::complex<double> value){ m_U1[component](i,j) = value; }
+        void set_n1_at(int i, int j, std::complex<double> value){ m_n1(i,j) = value; }
+        void set_n0(const double& n0){ m_n0 = n0; }
+        void set_q(const double& q){ m_q = q; }
+        void set_m(const double& m){ m_m = m; }
+        void set_T(const double& T){ m_T = T; }
        
         std::vector<Eigen::MatrixXcd> get_U1() const { return m_U1; }
         Eigen::MatrixXcd get_n1() const { return m_n1; }

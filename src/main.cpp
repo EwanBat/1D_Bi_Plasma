@@ -51,14 +51,14 @@ void save_matrix_to_txt(Eigen::MatrixXd& matrix, const std::string& filename) {
 
 int main() {
     double t0 = 0; // Initial time in s
-    double tf = 1e-2; // Final time in s
-    double dt = 1e-4; // Time step in s
+    double tf = 1e-3; // Final time in s
+    double dt = 1e-5; // Time step in s
     const int Nt = ((tf - t0) / dt) + 1; // Number of time steps
     std::vector<double> t_grid(Nt);
     for (int i = 0; i < Nt; ++i) {t_grid[i] = t0 + i * dt;}
     std::cout << "Number of time steps: " << Nt << std::endl;
 
-    double kxi = 1e-3; // Minimum wave number in m^-1
+    double kxi = 1e-2; // Minimum wave number in m^-1
     double kxf = 1e-1; // Maximum wave number in m^-1
     double dkx = 1e-3; // Wave number step in m^-1
     const int Nkx = ((kxf - kxi) / dkx) + 1; // Number of wave number steps
@@ -66,9 +66,9 @@ int main() {
     for (int i = 0; i < Nkx; ++i) {kx_grid[i] = kxi + i * dkx;}
     std::cout << "Number of kx steps: " << Nkx << std::endl;
 
-    double x0 = -2.0 * M_PI / kxi; // Minimum position in m
+    double x0 = 0; // Minimum position in m
     double xf = 2.0 * M_PI / kxi; // Maximum position in m
-    double dx = 2.0 * M_PI / (Nkx * dkx); // Position step in m
+    double dx = 2.0 * M_PI / (dkx * Nkx); // Position step in m
     const int Nx = ((xf - x0) / dx) + 1; // Number of position steps
     std::vector<double> x_grid(Nx);
     for (int i = 0; i < Nx; ++i) {x_grid[i] = x0 + i * dx;}
