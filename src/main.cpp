@@ -12,8 +12,8 @@
 #include "../include/fourier.hpp"
 
 const double n0 = 1e6; // Density in m^-3
-const double T_e = 1e5; // Electron temperature in K
-const double T_i = 1e5; // Ion temperature in K
+const double T_e = 1e3; // Electron temperature in K
+const double T_i = 1e3; // Ion temperature in K
 const double qe = -consts::e; // Electron charge in C
 const double qi = consts::e; // Ion charge in C
 const double me = consts::me; // Electron mass in kg
@@ -58,9 +58,9 @@ int main() {
     for (int i = 0; i < Nt; ++i) {t_grid[i] = t0 + i * dt;}
     std::cout << "Number of time steps: " << Nt << std::endl;
 
-    double kxi = 1e-2; // Minimum wave number in m^-1
+    double kxi = 1e-3; // Minimum wave number in m^-1
     double kxf = 1e-1; // Maximum wave number in m^-1
-    double dkx = 1e-3; // Wave number step in m^-1
+    double dkx = 1e-4; // Wave number step in m^-1
     const int Nkx = ((kxf - kxi) / dkx) + 1; // Number of wave number steps
     std::vector<double> kx_grid(Nkx);
     for (int i = 0; i < Nkx; ++i) {kx_grid[i] = kxi + i * dkx;}
@@ -83,6 +83,7 @@ int main() {
     system.m_electron.initial_constant(n0, qe, me, T_e);
     system.m_ion.initial_constant(n0, qi, mi, T_i);
     system.setup_system(Nkx, Nt);
+    system.print_parameter();
 
     // Initial perturbations in kx-space
     Eigen::MatrixXcd n1e_k(Nkx, Nt); n1e_k.setZero();

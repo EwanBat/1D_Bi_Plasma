@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <ostream>
 #include "Eigen/Dense"
 #include "Eigen/src/Core/Matrix.h"
 
@@ -89,6 +90,14 @@ class bi_system{
             m_field.resize_perturbation(Nkx, Tstep);
         }
 
+        void print_parameter(){
+            std::cout << "Plasma frequency of electron: " << std::sqrt(omega_e) << " s-1" << std::endl;
+            std::cout << "Plasma frequency of ion: " << std::sqrt(omega_i) << " s-1" << std::endl;
+            std::cout << "Sound celerity of electron: " << std::sqrt(cs_e) << " m.s-1" << std::endl;
+            std::cout << "Sound celerity of electron: " << std::sqrt(cs_i) << " m.s-1" << std::endl;
+
+        }
+
         void iteration(double t0, double tf, double dt, double kxi, double kxf, double dkx){
             const int Tstep = ((tf - t0) / dt) + 1;
             const int Nkx = ((kxf - kxi) / dkx) + 1;
@@ -104,8 +113,8 @@ class bi_system{
                     // Update longitudinal perturbations
                     result_rk4 = rk4_step(longitudinal_matrix, longitudinal_vector, dt);
                     m_electron.set_n1_at(idx, step+1, result_rk4(0));
-                    m_electron.set_U1_at(idx, step+1, 0, result_rk4(1));
-                    m_ion.set_n1_at(idx, step+1, result_rk4(2));
+                    m_ion.set_n1_at(idx, step+1, result_rk4(1));
+                    m_electron.set_U1_at(idx, step+1, 0, result_rk4(2));
                     m_ion.set_U1_at(idx, step+1, 0, result_rk4(3));
 
                     // Update transverse perturbations
