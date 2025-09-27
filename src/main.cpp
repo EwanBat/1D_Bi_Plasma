@@ -4,7 +4,6 @@
 #include <complex>
 #include <string>
 #include <vector>
-#include <fstream>
 
 #include "../include/field.hpp"
 #include "../include/plasma.hpp"
@@ -19,40 +18,11 @@ const double qi = consts::e; // Ion charge in C
 const double me = consts::me; // Electron mass in kg
 const double mi = consts::mp; // Ion mass in kg (proton mass)
 
-void save_vector_to_txt(std::vector<double>& vec, const std::string& filename) {
-    std::ofstream file(filename);
-    if (file.is_open()) {
-        for (const auto& value : vec) {
-            file << value << "\n";
-        }
-        file.close();
-    } else {
-        std::cerr << "Unable to open file " << filename << std::endl;
-    }
-}
-
-void save_matrix_to_txt(Eigen::MatrixXd& matrix, const std::string& filename) {
-    std::ofstream file(filename);
-    if (file.is_open()) {
-        for (int i = 0; i < matrix.rows(); ++i) {
-            for (int j = 0; j < matrix.cols(); ++j) {
-                file << matrix(i, j);
-                if (j < matrix.cols() - 1) {
-                    file << ","; // Separate values with commas
-                }
-            }
-            file << "\n"; // New line at the end of each row
-        }
-        file.close();
-    } else {
-        std::cerr << "Unable to open file " << filename << std::endl;
-    }
-}
 
 int main() {
     double t0 = 0; // Initial time in s
-    double tf = 1e-3; // Final time in s
-    double dt = 1e-5; // Time step in s
+    double tf = 1e-5; // Final time in s
+    double dt = 5e-8; // Time step in s
     const int Nt = ((tf - t0) / dt) + 1; // Number of time steps
     std::vector<double> t_grid(Nt);
     for (int i = 0; i < Nt; ++i) {t_grid[i] = t0 + i * dt;}
@@ -60,23 +30,19 @@ int main() {
 
     double kxi = 1e-3; // Minimum wave number in m^-1
     double kxf = 1e-1; // Maximum wave number in m^-1
-    double dkx = 1e-4; // Wave number step in m^-1
+    double dkx = 1e-3; // Wave number step in m^-1
     const int Nkx = ((kxf - kxi) / dkx) + 1; // Number of wave number steps
     std::vector<double> kx_grid(Nkx);
     for (int i = 0; i < Nkx; ++i) {kx_grid[i] = kxi + i * dkx;}
     std::cout << "Number of kx steps: " << Nkx << std::endl;
 
-    double x0 = 0; // Minimum position in m
+    double x0 = -2.0 * M_PI / kxi; // Minimum position in m
     double xf = 2.0 * M_PI / kxi; // Maximum position in m
     double dx = 2.0 * M_PI / (dkx * Nkx); // Position step in m
     const int Nx = ((xf - x0) / dx) + 1; // Number of position steps
     std::vector<double> x_grid(Nx);
     for (int i = 0; i < Nx; ++i) {x_grid[i] = x0 + i * dx;}
     std::cout << "Number of x steps: " << Nx << std::endl;
-    
-    save_vector_to_txt(t_grid, "../data/t_grid.txt");
-    save_vector_to_txt(kx_grid, "../data/kx_grid.txt");
-    save_vector_to_txt(x_grid, "../data/x_grid.txt");
 
     // Initialize plasma species
     bi_system system;
@@ -104,27 +70,13 @@ int main() {
 
     // Iterate over time and wave numbers and transform back to real space
     system.iteration(t0, tf, dt, kxi, kxf, dkx);
-
-    Eigen::MatrixXd n1e_real, n1i_real;
-    std::vector<Eigen::MatrixXd> U1e_real(2), U1i_real(2);
-    U1e_real[0].resize(Nx, Nt); U1e_real[0].setZero(); U1e_real[1].resize(Nx, Nt); U1e_real[1].setZero();
-    U1i_real[0].resize(Nx, Nt); U1i_real[0].setZero(); U1i_real[1].resize(Nx, Nt); U1i_real[1].setZero();
-
-
-    inverse_fourier_transform(system.m_electron.m_n1, n1e_real, t_grid, kx_grid, x_grid);
-    inverse_fourier_transform(system.m_ion.m_n1, n1i_real, t_grid, kx_grid, x_grid);
-    inverse_fourier_transform(system.m_electron.m_U1[0], U1e_real[0], t_grid, kx_grid, x_grid);
-    inverse_fourier_transform(system.m_electron.m_U1[1], U1e_real[1], t_grid, kx_grid, x_grid);
-    inverse_fourier_transform(system.m_ion.m_U1[0], U1i_real[0], t_grid, kx_grid, x_grid);
-    inverse_fourier_transform(system.m_ion.m_U1[1], U1i_real[1], t_grid, kx_grid, x_grid);
-
-    save_matrix_to_txt(n1e_real, "../data/n1e_real.txt");
-    save_matrix_to_txt(n1i_real, "../data/n1i_real.txt");
-    save_matrix_to_txt(U1e_real[0], "../data/U1e_real_x.txt");
-    save_matrix_to_txt(U1e_real[1], "../data/U1e_real_y.txt");
-    save_matrix_to_txt(U1i_real[0], "../data/U1i_real_x.txt");
-    save_matrix_to_txt(U1i_real[1], "../data/U1i_real_y.txt");
-
+    system.save_datas(t_grid, kx_grid, x_grid);
     system.clear_system();
+
+    std::string cmd = "python3 ../src/plot.py";
+    int result = std::system(cmd.c_str());
+    if (result != 0) {
+        std::cerr << "Erreur lors de l'affichage Python.\n";
+    }    
     return 0;
 }

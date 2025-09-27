@@ -17,7 +17,6 @@ def animation_densities():
     fig = plt.figure(figsize=(10, 6))
     gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
     
-
     ax1 = fig.add_subplot(gs[0])
     ax2 = fig.add_subplot(gs[1])
     
@@ -31,7 +30,6 @@ def animation_densities():
     ax1.grid()
     ax1.set_title('Density Perturbations at t=0s')
     
-    line3, = ax2.plot([], [], 'g-', label='Wave Number Spectrum')
     ax2.set_xlim(float(np.min(kx_grid)), float(np.max(kx_grid)))
     ax2.set_ylim(0, 1.1 * np.max(np.abs(np.fft.fft(n1e[:, 0]))) )
     ax2.set_xlabel('Wave Number kx (m$^{-1}$)')
@@ -42,25 +40,35 @@ def animation_densities():
     def init():
         line1.set_data([], [])
         line2.set_data([], [])
-        line3.set_data([], [])
-        return line1, line2, line3
+        return line1, line2
     
     def update(frame):
         line1.set_data(x_grid, n1e[:, frame])
         line2.set_data(x_grid, n1i[:, frame])
         
-        n1e_fft = np.fft.fft(n1e[:, frame], n=len(kx_grid))
-        line3.set_data(kx_grid, np.abs(n1e_fft))
+        # FFT et spectre
+        n1e_fft = np.fft.fftshift(np.fft.fft(n1e[:, frame], n=len(kx_grid)))
+        n1i_fft = np.fft.fftshift(np.fft.fft(n1i[:, frame], n=len(kx_grid)))
+        kx_shifted = np.fft.fftshift(kx_grid)
+
+        ax2.cla()
+        ax2.stem(kx_shifted, np.abs(n1e_fft), linefmt='b-', markerfmt='bo', basefmt='k-', label="Electron")
+        ax2.stem(kx_shifted, np.abs(n1i_fft), linefmt='r-', markerfmt='ro', basefmt='k-', label="Ion")
+        ax2.set_xlim(float(np.min(kx_grid)), float(np.max(kx_grid)))
+        ax2.set_xlabel('Wave Number kx (m$^{-1}$)')
+        ax2.set_ylabel('Magnitude')
+        ax2.grid()
 
         ax1.set_title(f'Density Perturbations at t={t_grid[frame]:.2e}s')
         
-        return line1, line2, line3
+        return line1, line2
     
     ani = FuncAnimation(fig, update, frames=len(t_grid), init_func=init,
                         blit=True, interval=100)
     ani.save('../src/density_perturbations.mp4', writer='ffmpeg', fps=10)
 
     plt.tight_layout()
+    print("File save in ../src/density_perturbations.mp4")
 
 def animation_velocities_electron():
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -93,6 +101,7 @@ def animation_velocities_electron():
     ani.save('../src/electron_velocity_perturbations.mp4', writer='ffmpeg', fps=10)
 
     plt.tight_layout()
+    print("File save in ../src/electron_velocity_perturbations.mp4")
 
 animation_densities()
 animation_velocities_electron()

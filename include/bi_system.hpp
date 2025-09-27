@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fstream>
 #include <iostream>
 #include <ostream>
 #include "Eigen/Dense"
@@ -8,6 +9,7 @@
 #include "field.hpp"
 #include "plasma.hpp"
 #include "constants.hpp"
+#include "fourier.hpp"
 
 // Define a bi-fluid plasma system in kx-space
 class bi_system{
@@ -62,8 +64,40 @@ class bi_system{
             Eigen::VectorXcd k1 = A * y;
             Eigen::VectorXcd k2 = A * (y + 0.5 * dt * k1);
             Eigen::VectorXcd k3 = A * (y + 0.5 * dt * k2);
-            Eigen::VectorXcd k4 = A * (y + dt * k3);
+            Eigen::VectorXcd k4 = A * (y + dt * k3) * 0;
             return y + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4);
+        }
+
+        void save_vector_to_txt(std::vector<double>& vec, const std::string& filename) {
+            std::ofstream file(filename);
+            if (file.is_open()) {
+                for (const auto& value : vec) {
+                    file << value << "\n";
+                }
+                file.close();
+                vec.resize(0,0);
+            } else {
+                std::cerr << "Unable to open file " << filename << std::endl;
+            }
+        }
+
+        void save_matrix_to_txt(Eigen::MatrixXd& matrix, const std::string& filename) {
+            std::ofstream file(filename);
+            if (file.is_open()) {
+                for (int i = 0; i < matrix.rows(); ++i) {
+                    for (int j = 0; j < matrix.cols(); ++j) {
+                        file << matrix(i, j);
+                        if (j < matrix.cols() - 1) {
+                            file << ","; // Separate values with commas
+                        }
+                    }
+                    file << "\n"; // New line at the end of each row
+                }
+                file.close();
+                matrix.resize(0,0);
+            } else {
+                std::cerr << "Unable to open file " << filename << std::endl;
+            }
         }
 
     public:
@@ -94,8 +128,7 @@ class bi_system{
             std::cout << "Plasma frequency of electron: " << std::sqrt(omega_e) << " s-1" << std::endl;
             std::cout << "Plasma frequency of ion: " << std::sqrt(omega_i) << " s-1" << std::endl;
             std::cout << "Sound celerity of electron: " << std::sqrt(cs_e) << " m.s-1" << std::endl;
-            std::cout << "Sound celerity of electron: " << std::sqrt(cs_i) << " m.s-1" << std::endl;
-
+            std::cout << "Sound celerity of ion: " << std::sqrt(cs_i) << " m.s-1" << std::endl;
         }
 
         void iteration(double t0, double tf, double dt, double kxi, double kxf, double dkx){
@@ -125,6 +158,36 @@ class bi_system{
                     m_field.set_B1_at(idx, step + 1, result_rk4(3));
                 }
             }
+        }
+
+        void save_datas(std::vector<double>& t_grid, std::vector<double>& kx_grid, std::vector<double>& x_grid){
+            int Nt = t_grid.size(), Nx = x_grid.size();   
+        
+            Eigen::MatrixXd n1e_real, n1i_real, E_real, B_real;
+            std::vector<Eigen::MatrixXd> U1e_real(2), U1i_real(2);
+            U1e_real[0].resize(Nx, Nt); U1e_real[0].setZero(); U1e_real[1].resize(Nx, Nt); U1e_real[1].setZero();
+            U1i_real[0].resize(Nx, Nt); U1i_real[0].setZero(); U1i_real[1].resize(Nx, Nt); U1i_real[1].setZero();
+            inverse_fourier_transform(m_electron.m_n1, n1e_real, t_grid, kx_grid, x_grid);
+            inverse_fourier_transform(m_ion.m_n1, n1i_real, t_grid, kx_grid, x_grid);
+            inverse_fourier_transform(m_electron.m_U1[0], U1e_real[0], t_grid, kx_grid, x_grid);
+            inverse_fourier_transform(m_electron.m_U1[1], U1e_real[1], t_grid, kx_grid, x_grid);
+            inverse_fourier_transform(m_ion.m_U1[0], U1i_real[0], t_grid, kx_grid, x_grid);
+            inverse_fourier_transform(m_ion.m_U1[1], U1i_real[1], t_grid, kx_grid, x_grid);
+            inverse_fourier_transform(m_field.m_E1, E_real, t_grid, kx_grid, x_grid);
+            inverse_fourier_transform(m_field.m_B1, B_real, t_grid, kx_grid, x_grid);
+
+            save_vector_to_txt(t_grid, "../data/t_grid.txt");
+            save_vector_to_txt(kx_grid, "../data/kx_grid.txt");
+            save_vector_to_txt(x_grid, "../data/x_grid.txt");
+
+            save_matrix_to_txt(n1e_real, "../data/n1e_real.txt");
+            save_matrix_to_txt(n1i_real, "../data/n1i_real.txt");
+            save_matrix_to_txt(U1e_real[0], "../data/U1e_real_x.txt");
+            save_matrix_to_txt(U1e_real[1], "../data/U1e_real_y.txt");
+            save_matrix_to_txt(U1i_real[0], "../data/U1i_real_x.txt");
+            save_matrix_to_txt(U1i_real[1], "../data/U1i_real_y.txt");
+            save_matrix_to_txt(E_real, "../data/E_real.txt");
+            save_matrix_to_txt(B_real, "../data/B_real.txt");
         }
 
         void clear_system() {
