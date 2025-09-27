@@ -8,7 +8,6 @@
 #include "../include/field.hpp"
 #include "../include/plasma.hpp"
 #include "../include/bi_system.hpp"
-#include "../include/fourier.hpp"
 
 const double n0 = 1e6; // Density in m^-3
 const double T_e = 1e3; // Electron temperature in K
@@ -17,7 +16,6 @@ const double qe = -consts::e; // Electron charge in C
 const double qi = consts::e; // Ion charge in C
 const double me = consts::me; // Electron mass in kg
 const double mi = consts::mp; // Ion mass in kg (proton mass)
-
 
 int main() {
     double t0 = 0; // Initial time in s

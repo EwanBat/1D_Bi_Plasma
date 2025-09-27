@@ -117,24 +117,24 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named plasma1d
+# Target rules for targets named bi_plasma
 
 # Build rule for target.
-plasma1d: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 plasma1d
-.PHONY : plasma1d
+bi_plasma: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 bi_plasma
+.PHONY : bi_plasma
 
 # fast build rule for target.
-plasma1d/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/plasma1d.dir/build.make CMakeFiles/plasma1d.dir/build
-.PHONY : plasma1d/fast
+bi_plasma/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bi_plasma.dir/build.make CMakeFiles/bi_plasma.dir/build
+.PHONY : bi_plasma/fast
 
 src/fourier.o: src/fourier.cpp.o
 .PHONY : src/fourier.o
 
 # target to build an object file
 src/fourier.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/plasma1d.dir/build.make CMakeFiles/plasma1d.dir/src/fourier.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bi_plasma.dir/build.make CMakeFiles/bi_plasma.dir/src/fourier.cpp.o
 .PHONY : src/fourier.cpp.o
 
 src/fourier.i: src/fourier.cpp.i
@@ -142,7 +142,7 @@ src/fourier.i: src/fourier.cpp.i
 
 # target to preprocess a source file
 src/fourier.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/plasma1d.dir/build.make CMakeFiles/plasma1d.dir/src/fourier.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bi_plasma.dir/build.make CMakeFiles/bi_plasma.dir/src/fourier.cpp.i
 .PHONY : src/fourier.cpp.i
 
 src/fourier.s: src/fourier.cpp.s
@@ -150,7 +150,7 @@ src/fourier.s: src/fourier.cpp.s
 
 # target to generate assembly for a file
 src/fourier.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/plasma1d.dir/build.make CMakeFiles/plasma1d.dir/src/fourier.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bi_plasma.dir/build.make CMakeFiles/bi_plasma.dir/src/fourier.cpp.s
 .PHONY : src/fourier.cpp.s
 
 src/main.o: src/main.cpp.o
@@ -158,7 +158,7 @@ src/main.o: src/main.cpp.o
 
 # target to build an object file
 src/main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/plasma1d.dir/build.make CMakeFiles/plasma1d.dir/src/main.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bi_plasma.dir/build.make CMakeFiles/bi_plasma.dir/src/main.cpp.o
 .PHONY : src/main.cpp.o
 
 src/main.i: src/main.cpp.i
@@ -166,7 +166,7 @@ src/main.i: src/main.cpp.i
 
 # target to preprocess a source file
 src/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/plasma1d.dir/build.make CMakeFiles/plasma1d.dir/src/main.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bi_plasma.dir/build.make CMakeFiles/bi_plasma.dir/src/main.cpp.i
 .PHONY : src/main.cpp.i
 
 src/main.s: src/main.cpp.s
@@ -174,7 +174,7 @@ src/main.s: src/main.cpp.s
 
 # target to generate assembly for a file
 src/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/plasma1d.dir/build.make CMakeFiles/plasma1d.dir/src/main.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bi_plasma.dir/build.make CMakeFiles/bi_plasma.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
 # Help Target
@@ -185,7 +185,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... plasma1d"
+	@echo "... bi_plasma"
 	@echo "... src/fourier.o"
 	@echo "... src/fourier.i"
 	@echo "... src/fourier.s"

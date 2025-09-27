@@ -20,12 +20,12 @@ def animation_densities():
     ax1 = fig.add_subplot(gs[0])
     ax2 = fig.add_subplot(gs[1])
     
-    line1, = ax1.plot([], [], 'b-', label='Electron Density Perturbation')
-    line2, = ax1.plot([], [], 'r-', label='Ion Density Perturbation')
+    line1, = ax1.plot([], [], 'green-', label='Electron Density Perturbation')
+    line2, = ax1.plot([], [], 'orange-', label='Ion Density Perturbation')
     ax1.set_xlim(float(np.min(x_grid)), float(np.max(x_grid)))
     ax1.set_ylim(1.5 * np.min((float(np.min(n1i)), float(np.min(n1e)))), 1.5 * np.max((float(np.max(n1i)), float(np.max(n1e)))))
     ax1.set_xlabel('x (m)')
-    ax1.set_ylabel('Density Perturbation')
+    ax1.set_ylabel(r'Density Perturbation [m^{-3}]')
     ax1.legend()
     ax1.grid()
     ax1.set_title('Density Perturbations at t=0s')
@@ -73,12 +73,12 @@ def animation_densities():
 def animation_velocities_electron():
     fig, ax = plt.subplots(figsize=(10, 6))
     
-    line1, = ax.plot([], [], 'b-', label='Electron Velocity Perturbation Ue1x')
-    line2, = ax.plot([], [], 'r-', label='Electron Velocity Perturbation Ue1y')
+    line1, = ax.plot([], [], 'green-', label=r'U_{e1x}')
+    line2, = ax.plot([], [], 'orange-', label=r'U_{e1y}')
     ax.set_xlim(float(np.min(x_grid)), float(np.max(x_grid)))
     ax.set_ylim(1.5 * np.min((float(np.min(Ue1x)), float(np.min(Ue1y)))), 1.5 * np.max((float(np.max(Ue1x)), float(np.max(Ue1y)))))
-    ax.set_xlabel('x (m)')
-    ax.set_ylabel('Velocity Perturbation')
+    ax.set_xlabel('x [m]')
+    ax.set_ylabel('Velocity Perturbation [m/s]')
     ax.legend()
     ax.grid()
     ax.set_title('Electron Velocity Perturbations at t=0s')
@@ -103,5 +103,45 @@ def animation_velocities_electron():
     plt.tight_layout()
     print("File save in ../src/electron_velocity_perturbations.mp4")
 
-animation_densities()
-animation_velocities_electron()
+def display_system(save = False):
+    fig = plt.figure(figsize=(12, 6))
+    fig.suptitle("Evolution of the plasma")
+    gs = gridspec.GridSpec(3, 1)
+
+    ax1, ax2, ax3 = fig.add_subplot(gs[0,0]), fig.add_subplot(gs[1,0]), fig.add_subplot(gs[2,0])
+
+    ax1.plot(x_grid, n1e[:,-1], color = "g", label = "Electron")
+    ax1.plot(x_grid, n1i[:,-1], color = "orange", label = "Ion")
+    ax1.set_xlim(float(np.min(x_grid)), float(np.max(x_grid)))
+    ax1.set_ylim(1.5 * np.min((float(np.min(n1i)), float(np.min(n1e)))), 1.5 * np.max((float(np.max(n1i)), float(np.max(n1e)))))
+    ax1.set_xlabel('x (m)')
+    ax1.set_ylabel(r'Density [m$^{-3}$]')
+    ax1.legend()
+    ax1.grid()
+
+    ax2.plot(x_grid, Ue1x[:,-1], color = "g", label = "Electron")
+    ax2.plot(x_grid, Ui1x[:,-1], color = "orange", label = "Ion")
+    ax2.set_xlim(float(np.min(x_grid)), float(np.max(x_grid)))
+    ax2.set_ylim(1.5 * np.min((float(np.min(Ue1x)), float(np.min(Ui1x)))), 1.5 * np.max((float(np.max(Ue1x)), float(np.max(Ui1x)))))
+    ax2.set_xlabel('x [m]')
+    ax2.set_ylabel('X-axis Velocity [m/s]')
+    ax2.legend()
+    ax2.grid()
+
+    ax3.plot(x_grid, Ue1y[:,-1], color = "g", label = "Electron")
+    ax3.plot(x_grid, Ui1y[:,-1], color = "orange", label = "Ion")
+    ax3.set_xlim(float(np.min(x_grid)), float(np.max(x_grid)))
+    ax3.set_ylim(1.5 * np.min((float(np.min(Ue1y)), float(np.min(Ui1y)))), 1.5 * np.max((float(np.max(Ue1y)), float(np.max(Ui1y)))))
+    ax3.set_xlabel('x [m]')
+    ax3.set_ylabel('Y-axis Velocity [m/s]')
+    ax3.legend()
+    ax3.grid()
+
+    plt.tight_layout()
+
+    if save:
+        plt.savefig("../src/system.png",dpi=300)
+
+# animation_densities()
+# animation_velocities_electron()
+display_system(True)

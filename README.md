@@ -46,14 +46,14 @@ $$
 \frac{d}{dt} \mathbf{y}(k,t) = A(k)\,\mathbf{y}(k,t).
 $$
 
-### Longitudinal block (electrostatic, variables ($`\delta n_e, u_{e,x}, \delta n_i, u_{i,x})`$):
+### Longitudinal block (electrostatic, variables ($`\delta n_e, u_{e,x}, \delta n_i, u_{i,x})`$)):
 
 $$
 \mathbf{y}_L = 
 \begin{bmatrix}
 \delta n_e \\
-u_{e,x} \\
 \delta n_i \\
+u_{e,x} \\
 u_{i,x}
 \end{bmatrix},
 $$
@@ -61,10 +61,10 @@ $$
 $$
 A_L(k) =
 \begin{bmatrix}
-0 & -ik n_{0e} & 0 & 0 \\
-\frac{e}{m_e \varepsilon_0}\frac{1}{ik} & 0 & -\frac{e}{m_e \varepsilon_0}\frac{1}{ik} & 0 \\
+0 & 0 & -ik n_{0e} & 0 \\
 0 & 0 & 0 & -ik n_{0i} \\
--\frac{e}{m_i \varepsilon_0}\frac{1}{ik} & 0 & \frac{e}{m_i \varepsilon_0}\frac{1}{ik} & 0
+\frac{omega_{pe}^2}{i k n_{0e}} - i c_{se}^2 k& -\frac{omega_{pe}^2}{i k n_{0e}} & 0 & 0 \\
+-\frac{omega_{pi}^2}{i k n_{0i}} & \frac{omega_{pi}^2}{i k n_{0i}} - i c_{si}^2 & 0 & 0
 \end{bmatrix}.
 $$
 
@@ -89,7 +89,7 @@ A_T(k) =
 \begin{bmatrix}
 0 & 0 & -\tfrac{e}{m_e} & 0 \\
 0 & 0 & \tfrac{e}{m_i} & 0 \\
--\tfrac{e n_{0e}}{\varepsilon_0} & \tfrac{e n_{0i}}{\varepsilon_0} & 0 & i c^2 k \\
+\tfrac{e n_{0e}}{\varepsilon_0} & -\tfrac{e n_{0i}}{\varepsilon_0} & 0 & i c^2 k \\
 0 & 0 & -i k & 0
 \end{bmatrix}.
 $$
@@ -98,6 +98,8 @@ This reproduces electromagnetic plasma waves with dispersion
 $`\omega^2 = \omega_p^2 + c^2 k^2.`$
 
 ---
+
+<p align="center"> <img src="src/system.png" width="600" alt="Thermal bridge geometry"/> </p>
 
 ## Project Structure
 

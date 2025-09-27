@@ -23,9 +23,9 @@ file(GLOB HEADERS
 )
 
 # Create executable
-add_executable(plasma1d ${SOURCES} ${HEADERS})
+add_executable(bi_plasma ${SOURCES} ${HEADERS})
 
 # Optionally, set the output directory
-set_target_properties(plasma1d PROPERTIES
+set_target_properties(bi_plasma PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
