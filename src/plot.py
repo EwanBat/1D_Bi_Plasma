@@ -20,13 +20,12 @@ def animation_densities():
     ax1 = fig.add_subplot(gs[0])
     ax2 = fig.add_subplot(gs[1])
     
-    line1, = ax1.plot([], [], 'green-', label='Electron Density Perturbation')
-    line2, = ax1.plot([], [], 'orange-', label='Ion Density Perturbation')
+    line1, = ax1.plot([], [], color = 'green', label='Electron Density Perturbation')
+    line2, = ax1.plot([], [], color = 'orange', label='Ion Density Perturbation')
     ax1.set_xlim(float(np.min(x_grid)), float(np.max(x_grid)))
     ax1.set_ylim(1.5 * np.min((float(np.min(n1i)), float(np.min(n1e)))), 1.5 * np.max((float(np.max(n1i)), float(np.max(n1e)))))
     ax1.set_xlabel('x (m)')
     ax1.set_ylabel(r'Density Perturbation [m^{-3}]')
-    ax1.legend()
     ax1.grid()
     ax1.set_title('Density Perturbations at t=0s')
     
@@ -34,7 +33,6 @@ def animation_densities():
     ax2.set_ylim(0, 1.1 * np.max(np.abs(np.fft.fft(n1e[:, 0]))) )
     ax2.set_xlabel('Wave Number kx (m$^{-1}$)')
     ax2.set_ylabel('Magnitude')
-    ax2.legend()
     ax2.grid()
     
     def init():
@@ -62,6 +60,8 @@ def animation_densities():
         ax1.set_title(f'Density Perturbations at t={t_grid[frame]:.2e}s')
         
         return line1, line2
+
+    ax1.legend() 
     
     ani = FuncAnimation(fig, update, frames=len(t_grid), init_func=init,
                         blit=True, interval=100)
@@ -73,13 +73,12 @@ def animation_densities():
 def animation_velocities_electron():
     fig, ax = plt.subplots(figsize=(10, 6))
     
-    line1, = ax.plot([], [], 'green-', label=r'U_{e1x}')
-    line2, = ax.plot([], [], 'orange-', label=r'U_{e1y}')
+    line1, = ax.plot([], [], color = 'green', label=r'U$_{e1x}$')
+    line2, = ax.plot([], [], color = 'orange', label=r'U$_{e1y}$')
     ax.set_xlim(float(np.min(x_grid)), float(np.max(x_grid)))
     ax.set_ylim(1.5 * np.min((float(np.min(Ue1x)), float(np.min(Ue1y)))), 1.5 * np.max((float(np.max(Ue1x)), float(np.max(Ue1y)))))
     ax.set_xlabel('x [m]')
     ax.set_ylabel('Velocity Perturbation [m/s]')
-    ax.legend()
     ax.grid()
     ax.set_title('Electron Velocity Perturbations at t=0s')
     
@@ -95,7 +94,9 @@ def animation_velocities_electron():
         ax.set_title(f'Electron Velocity Perturbations at t={t_grid[frame]:.2e}s')
         
         return line1, line2
-    
+
+    ax.legend()
+
     ani = FuncAnimation(fig, update, frames=len(t_grid), init_func=init,
                         blit=True, interval=100)
     ani.save('../src/electron_velocity_perturbations.mp4', writer='ffmpeg', fps=10)
@@ -142,6 +143,6 @@ def display_system(save = False):
     if save:
         plt.savefig("../src/system.png",dpi=300)
 
-# animation_densities()
-# animation_velocities_electron()
+animation_densities()
+animation_velocities_electron()
 display_system(True)

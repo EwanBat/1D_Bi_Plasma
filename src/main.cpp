@@ -17,6 +17,40 @@ const double qi = consts::e; // Ion charge in C
 const double me = consts::me; // Electron mass in kg
 const double mi = consts::mp; // Ion mass in kg (proton mass)
 
+void pert_gaussian(bi_system &system, std::vector<double> &kx_grid, const int &Nkx, const int &Nt){
+    Eigen::MatrixXcd n1e_k(Nkx, Nt); n1e_k.setZero();
+    Eigen::MatrixXcd n1i_k(Nkx, Nt); n1i_k.setZero();
+    std::vector<Eigen::MatrixXcd> U1e_k(2); U1e_k[0].resize(Nkx, Nt); U1e_k[0].setZero(); U1e_k[1].resize(Nkx, Nt); U1e_k[1].setZero();
+    std::vector<Eigen::MatrixXcd> U1i_k(2); U1i_k[0].resize(Nkx, Nt); U1i_k[0].setZero(); U1i_k[1].resize(Nkx, Nt); U1i_k[1].setZero();
+    double kx0 = 5e-2; // Central wave number of the perturbation in m^-1
+    double sigma_kx = 1e-1; // Width of the perturbation in m^-1
+    double amplitude = 1e-3 * n0; // Amplitude of the density perturbation
+    for (int i = 0; i < Nkx; ++i) {
+        double kx = kx_grid[i];
+        double envelope = amplitude * exp(-0.5 * pow((kx - kx0) / sigma_kx, 2));
+        n1e_k(i, 0) = std::complex<double>(envelope, 0);
+        n1i_k(i, 0) = std::complex<double>(envelope, 0);
+    }
+
+    system.m_electron.initial_pertubation(n1e_k, U1e_k);
+    system.m_ion.initial_pertubation(n1i_k, U1i_k);
+}
+
+void pert_magnetic(bi_system &system, std::vector<double> &kx_grid, const int &Nkx, const int &Nt){
+    Eigen::MatrixXcd E1_k(Nkx, Nt); E1_k.setZero();
+    Eigen::MatrixXcd B1_k(Nkx, Nt); B1_k.setZero();
+    double kx0 = 5e-2; // Central wave number of the perturbation [m^-1]
+    double sigma_kx = 1e-3; // Width of the perturbation [m^-1]
+    double amplitude = 1e-8; // Amplitude of the magnetic field perturbation [T]
+
+    for (int i = 0; i < Nkx; ++i) {
+        double kx = kx_grid[i];
+        B1_k(i, 0) = std::complex<double>(0, amplitude);
+    }
+
+    system.m_field.initial_perturbation(E1_k, B1_k);
+}
+
 int main() {
     double t0 = 0; // Initial time in s
     double tf = 1e-5; // Final time in s
@@ -50,21 +84,8 @@ int main() {
     system.print_parameter();
 
     // Initial perturbations in kx-space
-    Eigen::MatrixXcd n1e_k(Nkx, Nt); n1e_k.setZero();
-    Eigen::MatrixXcd n1i_k(Nkx, Nt); n1i_k.setZero();
-    std::vector<Eigen::MatrixXcd> U1e_k(2); U1e_k[0].resize(Nkx, Nt); U1e_k[0].setZero(); U1e_k[1].resize(Nkx, Nt); U1e_k[1].setZero();
-    std::vector<Eigen::MatrixXcd> U1i_k(2); U1i_k[0].resize(Nkx, Nt); U1i_k[0].setZero(); U1i_k[1].resize(Nkx, Nt); U1i_k[1].setZero();
-    double kx0 = 5e-2; // Central wave number of the perturbation in m^-1
-    double sigma_kx = 1e-2; // Width of the perturbation in m^-1
-    double amplitude = 1e-2 * n0; // Amplitude of the density perturbation
-    for (int i = 0; i < Nkx; ++i) {
-        double kx = kx_grid[i];
-        double envelope = amplitude * exp(-0.5 * pow((kx - kx0) / sigma_kx, 2));
-        n1e_k(i, 0) = std::complex<double>(envelope, 0);
-        n1i_k(i, 0) = std::complex<double>(envelope, 0);
-    }
-    system.m_electron.initial_pertubation(n1e_k, U1e_k);
-    system.m_ion.initial_pertubation(n1i_k, U1i_k);
+    pert_gaussian(system, kx_grid, Nkx, Nt);
+    // pert_magnetic(system, kx_grid, Nkx, Nt);
 
     // Iterate over time and wave numbers and transform back to real space
     system.iteration(t0, tf, dt, kxi, kxf, dkx);
