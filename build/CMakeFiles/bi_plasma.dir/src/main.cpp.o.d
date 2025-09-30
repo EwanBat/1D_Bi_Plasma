@@ -1,4 +1,4 @@
-CMakeFiles/plasma1d.dir/src/main.cpp.o: \
+CMakeFiles/bi_plasma.dir/src/main.cpp.o: \
  /home/setenoi/1D_Bi_Plasma/src/main.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/13/iostream /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \

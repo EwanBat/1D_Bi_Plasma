@@ -8,8 +8,8 @@ class field{
         Eigen::MatrixXcd m_E1, m_B1;
 
         // Setters and getters
-        Eigen::MatrixXcd set_E1(const Eigen::MatrixXcd E1){ m_E1 = E1; return m_E1; }
-        Eigen::MatrixXcd set_B1(const Eigen::MatrixXcd B1){ m_B1 = B1; return m_B1; }
+        void set_E1_at(int i, int j, std::complex<double> E1){ m_E1(i,j) = E1;}
+        void set_B1_at(int i, int j, std::complex<double> B1){ m_B1(i,j) = B1;}
 
         Eigen::MatrixXcd get_E1() const { return m_E1; }
         Eigen::MatrixXcd get_B1() const { return m_B1; }
