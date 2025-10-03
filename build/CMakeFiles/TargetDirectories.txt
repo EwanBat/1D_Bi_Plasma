@@ -1,3 +1,0 @@
-/home/setenoi/1D_Bi_Plasma/build/CMakeFiles/bi_plasma.dir
-/home/setenoi/1D_Bi_Plasma/build/CMakeFiles/edit_cache.dir
-/home/setenoi/1D_Bi_Plasma/build/CMakeFiles/rebuild_cache.dir
