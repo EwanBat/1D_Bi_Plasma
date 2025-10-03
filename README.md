@@ -99,7 +99,7 @@ $`\omega^2 = \omega_p^2 + c^2 k^2.`$
 
 ---
 
-<p align="center"> <img src="src/system.png" width="600" alt="Propagation of the modes"/> </p>
+<p align="center"> <img src="src/dispersion_longitudinal.png" width="600" alt="Propagation of the modes"/> </p>
 
 ##  Project Structure
 
