@@ -53,16 +53,16 @@ void pert_magnetic(bi_system &system, std::vector<double> &kx_grid, const int &N
 
 int main() {
     double t0 = 0; // Initial time in s
-    double tf = 1e-5; // Final time in s
+    double tf = 1e-6; // Final time in s
     double dt = 5e-8; // Time step in s
     const int Nt = ((tf - t0) / dt) + 1; // Number of time steps
     std::vector<double> t_grid(Nt);
     for (int i = 0; i < Nt; ++i) {t_grid[i] = t0 + i * dt;}
     std::cout << "Number of time steps: " << Nt << std::endl;
 
-    double kxi = 1e-3; // Minimum wave number in m^-1
-    double kxf = 1e-1; // Maximum wave number in m^-1
-    double dkx = 1e-3; // Wave number step in m^-1
+    double kxi = 1e-1; // Minimum wave number in m^-1
+    double kxf = 10; // Maximum wave number in m^-1
+    double dkx = 1e-1; // Wave number step in m^-1
     const int Nkx = ((kxf - kxi) / dkx) + 1; // Number of wave number steps
     std::vector<double> kx_grid(Nkx);
     for (int i = 0; i < Nkx; ++i) {kx_grid[i] = kxi + i * dkx;}
@@ -92,10 +92,16 @@ int main() {
     system.save_datas(t_grid, kx_grid, x_grid);
     system.clear_system();
 
-    std::string cmd = "python3 ../src/plot.py";
+    std::string cmd = "python3 ../src/plot_time.py";
     int result = std::system(cmd.c_str());
     if (result != 0) {
         std::cerr << "Erreur lors de l'affichage Python.\n";
-    }    
+    }
+
+    std::string cmd2 = "python3 ../src/plot_pulsation.py";
+    int result2 = std::system(cmd2.c_str());
+    if (result2 != 0) {
+        std::cerr << "Erreur lors de l'affichage Python.\n";
+    }
     return 0;
 }

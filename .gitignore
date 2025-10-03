@@ -1,1 +1,4 @@
 *.mp4
+build/
+.cache/
+*.png

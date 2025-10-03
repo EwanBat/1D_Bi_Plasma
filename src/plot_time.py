@@ -68,7 +68,7 @@ def animation_densities():
     ani.save('../src/density_perturbations.mp4', writer='ffmpeg', fps=10)
 
     plt.tight_layout()
-    print("File save in ../src/density_perturbations.mp4")
+    print("Animation save in ../src/density_perturbations.mp4")
 
 def animation_velocities_electron():
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -102,7 +102,7 @@ def animation_velocities_electron():
     ani.save('../src/electron_velocity_perturbations.mp4', writer='ffmpeg', fps=10)
 
     plt.tight_layout()
-    print("File save in ../src/electron_velocity_perturbations.mp4")
+    print("Animation save in ../src/electron_velocity_perturbations.mp4")
 
 def display_system(save = False):
     fig = plt.figure(figsize=(12, 6))
@@ -142,6 +142,7 @@ def display_system(save = False):
 
     if save:
         plt.savefig("../src/system.png",dpi=300)
+        print("Figure save in ../src/system.png")
 
 animation_densities()
 animation_velocities_electron()
