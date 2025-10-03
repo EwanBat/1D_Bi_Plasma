@@ -73,29 +73,29 @@ CMakeFiles/bi_plasma.dir/src/fourier.cpp.o: CMakeFiles/bi_plasma.dir/flags.make
 CMakeFiles/bi_plasma.dir/src/fourier.cpp.o: /home/setenoi/1D_Bi_Plasma/src/fourier.cpp
 CMakeFiles/bi_plasma.dir/src/fourier.cpp.o: CMakeFiles/bi_plasma.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/setenoi/1D_Bi_Plasma/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/bi_plasma.dir/src/fourier.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/bi_plasma.dir/src/fourier.cpp.o -MF CMakeFiles/bi_plasma.dir/src/fourier.cpp.o.d -o CMakeFiles/bi_plasma.dir/src/fourier.cpp.o -c /home/setenoi/1D_Bi_Plasma/src/fourier.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/bi_plasma.dir/src/fourier.cpp.o -MF CMakeFiles/bi_plasma.dir/src/fourier.cpp.o.d -o CMakeFiles/bi_plasma.dir/src/fourier.cpp.o -c /home/setenoi/1D_Bi_Plasma/src/fourier.cpp
 
 CMakeFiles/bi_plasma.dir/src/fourier.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/bi_plasma.dir/src/fourier.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/setenoi/1D_Bi_Plasma/src/fourier.cpp > CMakeFiles/bi_plasma.dir/src/fourier.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/setenoi/1D_Bi_Plasma/src/fourier.cpp > CMakeFiles/bi_plasma.dir/src/fourier.cpp.i
 
 CMakeFiles/bi_plasma.dir/src/fourier.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/bi_plasma.dir/src/fourier.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/setenoi/1D_Bi_Plasma/src/fourier.cpp -o CMakeFiles/bi_plasma.dir/src/fourier.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/setenoi/1D_Bi_Plasma/src/fourier.cpp -o CMakeFiles/bi_plasma.dir/src/fourier.cpp.s
 
 CMakeFiles/bi_plasma.dir/src/main.cpp.o: CMakeFiles/bi_plasma.dir/flags.make
 CMakeFiles/bi_plasma.dir/src/main.cpp.o: /home/setenoi/1D_Bi_Plasma/src/main.cpp
 CMakeFiles/bi_plasma.dir/src/main.cpp.o: CMakeFiles/bi_plasma.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/setenoi/1D_Bi_Plasma/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/bi_plasma.dir/src/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/bi_plasma.dir/src/main.cpp.o -MF CMakeFiles/bi_plasma.dir/src/main.cpp.o.d -o CMakeFiles/bi_plasma.dir/src/main.cpp.o -c /home/setenoi/1D_Bi_Plasma/src/main.cpp
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/bi_plasma.dir/src/main.cpp.o -MF CMakeFiles/bi_plasma.dir/src/main.cpp.o.d -o CMakeFiles/bi_plasma.dir/src/main.cpp.o -c /home/setenoi/1D_Bi_Plasma/src/main.cpp
 
 CMakeFiles/bi_plasma.dir/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/bi_plasma.dir/src/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/setenoi/1D_Bi_Plasma/src/main.cpp > CMakeFiles/bi_plasma.dir/src/main.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/setenoi/1D_Bi_Plasma/src/main.cpp > CMakeFiles/bi_plasma.dir/src/main.cpp.i
 
 CMakeFiles/bi_plasma.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/bi_plasma.dir/src/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/setenoi/1D_Bi_Plasma/src/main.cpp -o CMakeFiles/bi_plasma.dir/src/main.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/setenoi/1D_Bi_Plasma/src/main.cpp -o CMakeFiles/bi_plasma.dir/src/main.cpp.s
 
 # Object files for target bi_plasma
 bi_plasma_OBJECTS = \

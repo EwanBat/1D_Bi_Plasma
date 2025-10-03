@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/home/setenoi/1D_Bi_Plasma/build",
+  "command": "/usr/bin/g++  -I/home/setenoi/1D_Bi_Plasma/include -g -std=gnu++17 -o CMakeFiles/bi_plasma.dir/src/fourier.cpp.o -c /home/setenoi/1D_Bi_Plasma/src/fourier.cpp",
+  "file": "/home/setenoi/1D_Bi_Plasma/src/fourier.cpp",
+  "output": "CMakeFiles/bi_plasma.dir/src/fourier.cpp.o"
+},
+{
+  "directory": "/home/setenoi/1D_Bi_Plasma/build",
+  "command": "/usr/bin/g++  -I/home/setenoi/1D_Bi_Plasma/include -g -std=gnu++17 -o CMakeFiles/bi_plasma.dir/src/main.cpp.o -c /home/setenoi/1D_Bi_Plasma/src/main.cpp",
+  "file": "/home/setenoi/1D_Bi_Plasma/src/main.cpp",
+  "output": "CMakeFiles/bi_plasma.dir/src/main.cpp.o"
+}
+]
