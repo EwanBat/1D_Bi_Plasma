@@ -63,8 +63,8 @@ A_L(k) =
 \begin{bmatrix}
 0 & 0 & -ik n_{0e} & 0 \\
 0 & 0 & 0 & -ik n_{0i} \\
-\frac{\omega_{pe}^2}{i k n_{0e}} - i c_{se}^2 k & -\frac{\omega_{pe}^2}{i k n_{0e}} & 0 & 0 \\
--\frac{\omega_{pi}^2}{i k n_{0i}} & \frac{\omega_{pi}^2}{i k n_{0i}} - i c_{si}^2 k & 0 & 0
+\frac{\omega_{pe}^2}{i k n_{0e}} - \frac{i c_{se}^2 k}{n_{0e}} & -\frac{\omega_{pe}^2}{i k n_{0e}} & 0 & 0 \\
+-\frac{\omega_{pi}^2}{i k n_{0i}} & \frac{\omega_{pi}^2}{i k n_{0i}} - \frac{i c_{si}^2 k}{n_{0i}} k & 0 & 0
 \end{bmatrix}.
 $$
 
@@ -99,7 +99,7 @@ $`\omega^2 = \omega_p^2 + c^2 k^2.`$
 
 ---
 
-<p align="center"> <img src="src/dispersion_longitudinal.png" width="600" alt="Propagation of the modes"/> </p>
+<p align="center"> <img src="image/dispersion_longitudinal.png" width="600" alt="Propagation of the modes"/> </p>
 
 ##  Project Structure
 

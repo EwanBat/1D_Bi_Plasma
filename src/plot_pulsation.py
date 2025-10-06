@@ -49,7 +49,7 @@ def plot_dispersion_relations(save = False):
     ax1.plot(kx_grid, eigenvalues_longitudinal[:, 3].real, 'm-', label='Mode 4 (Real)')
     
     ax1.set_title('Longitudinal Modes Dispersion Relation')
-    ax1.set_xlabel('Wave Number kx (m$^{-1}$)')
+    ax1.set_xlabel(r'Wave Number k$_x$ (m$^{-1}$)')
     ax1.set_ylabel('Frequency ω (rad/s)')
     ax1.legend()
     ax1.grid()
@@ -61,14 +61,14 @@ def plot_dispersion_relations(save = False):
     ax2.plot(kx_grid, eigenvalues_transverse[:, 2].imag, 'g--', label='Mode 3 (Imag)')
 
     ax2.set_title('Transverse Modes Dispersion Relation')
-    ax2.set_xlabel('Wave Number kx (m$^{-1}$)')
+    ax2.set_xlabel(r'Wave Number k$_x$ (m$^{-1}$)')
     ax2.set_ylabel('Frequency ω (rad/s)')
     ax2.legend()
     ax2.grid()
 
     plt.tight_layout()
     if save:
-        plt.savefig("../src/dispersion_relations.png", dpi=300)
+        plt.savefig("../image/dispersion_relations.png", dpi=300)
 
 def plot_dispersion_longitudinal(save=True): #Plot longitudinal dispersion relation only, real and imaginary parts split
     
@@ -79,11 +79,14 @@ def plot_dispersion_longitudinal(save=True): #Plot longitudinal dispersion relat
     ax2 = fig.add_subplot(gs[1])
     # Plot longitudinal modes - Real part (seulement 2 modes uniques)
     ax1.plot(kx_grid, abs(eigenvalues_longitudinal[:, 0].real), 'bo', label='Mode 1 (Real)')
+    # ax1.plot(kx_grid, abs(eigenvalues_longitudinal[:, 1].real), 'ro', label='Mode 2 (Real)')
     ax1.plot(kx_grid, abs(eigenvalues_longitudinal[:, 2].real), 'go', label='Mode 3 (Real)')
+    # ax1.plot(kx_grid, abs(eigenvalues_longitudinal[:, 3].real), 'mo', label='Mode 4 (Real)')
 
     ax1.set_title('Longitudinal Modes Dispersion Relation - Real Part')
-    ax1.set_xlabel('Wave Number kx (m$^{-1}$)')
+    ax1.set_xlabel(r'Wave Number k$_x$ (m$^{-1}$)')
     ax1.set_ylabel('Frequency ω (rad/s)')
+    ax1.set_xscale('log')
     ax1.legend()
     ax1.grid()
 
@@ -92,15 +95,16 @@ def plot_dispersion_longitudinal(save=True): #Plot longitudinal dispersion relat
     ax2.plot(kx_grid, abs(eigenvalues_longitudinal[:, 2].imag), 'gx', label='Mode 3 (Imag)')
 
     ax2.set_title('Longitudinal Modes Dispersion Relation - Imaginary Part')
-    ax2.set_xlabel('Wave Number kx (m$^{-1}$)')
+    ax2.set_xlabel(r'Wave Number k$_x$ (m$^{-1}$)')
     ax2.set_ylabel('Frequency ω (rad/s)')
+    ax2.set_xscale('log')
     ax2.legend()
     ax2.grid()
 
     plt.tight_layout()
     if save:
-        plt.savefig("../src/dispersion_longitudinal.png", dpi=300)
-        print("Figure save in ../src/dispersion_longitudinal.png")
+        plt.savefig("../image/dispersion_longitudinal.png", dpi=300)
+        print("Figure save in ../image/dispersion_longitudinal.png")
     
     plt.show()
 
@@ -117,8 +121,9 @@ def plot_dispersion_transverse(save=True): #Plot transverse dispersion relation 
     ax1.plot(kx_grid, abs(eigenvalues_transverse[:, 2].real), 'go', label='Mode 3 (Real)')
 
     ax1.set_title('Transverse Modes Dispersion Relation - Real Part')
-    ax1.set_xlabel('Wave Number kx (m$^{-1}$)')
+    ax1.set_xlabel(r'Wave Number k$_x$ (m$^{-1}$)')
     ax1.set_ylabel('Frequency ω (rad/s)')
+    ax1.set_xscale('log')
     ax1.legend()
     ax1.grid()
     
@@ -127,16 +132,18 @@ def plot_dispersion_transverse(save=True): #Plot transverse dispersion relation 
     ax2.plot(kx_grid, abs(eigenvalues_transverse[:, 2].imag), 'gx', label='Mode 3 (Imag)')
 
     ax2.set_title('Transverse Modes Dispersion Relation - Imaginary Part')
-    ax2.set_xlabel('Wave Number kx (m$^{-1}$)')
+    ax2.set_xlabel(r'Wave Number k$_x$ (m$^{-1}$)')
     ax2.set_ylabel('Frequency ω (rad/s)')
+    ax2.set_xscale('log')
     ax2.legend()
     ax2.grid()
 
     plt.tight_layout()
     if save:
-        plt.savefig("../src/dispersion_transverse.png", dpi=300)
-        print("Figure save in ../src/dispersion_transverse.png")
+        plt.savefig("../image/dispersion_transverse.png", dpi=300)
+        print("Figure save in ../image/dispersion_transverse.png")
     plt.show()
 
 # plot_dispersion_relations(save=True)
 plot_dispersion_longitudinal(save=True)
+plot_dispersion_transverse(save=True)

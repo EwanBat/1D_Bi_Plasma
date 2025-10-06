@@ -65,10 +65,10 @@ def animation_densities():
     
     ani = FuncAnimation(fig, update, frames=len(t_grid), init_func=init,
                         blit=True, interval=100)
-    ani.save('../src/density_perturbations.mp4', writer='ffmpeg', fps=10)
+    ani.save('../image/density_perturbations.mp4', writer='ffmpeg', fps=10)
 
     plt.tight_layout()
-    print("Animation save in ../src/density_perturbations.mp4")
+    print("Animation save in ../image/density_perturbations.mp4")
 
 def animation_velocities_electron():
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -99,10 +99,10 @@ def animation_velocities_electron():
 
     ani = FuncAnimation(fig, update, frames=len(t_grid), init_func=init,
                         blit=True, interval=100)
-    ani.save('../src/electron_velocity_perturbations.mp4', writer='ffmpeg', fps=10)
+    ani.save('../image/electron_velocity_perturbations.mp4', writer='ffmpeg', fps=10)
 
     plt.tight_layout()
-    print("Animation save in ../src/electron_velocity_perturbations.mp4")
+    print("Animation save in ../image/electron_velocity_perturbations.mp4")
 
 def display_system(save = False):
     fig = plt.figure(figsize=(12, 6))
@@ -141,8 +141,8 @@ def display_system(save = False):
     plt.tight_layout()
 
     if save:
-        plt.savefig("../src/system.png",dpi=300)
-        print("Figure save in ../src/system.png")
+        plt.savefig("../image/system.png",dpi=300)
+        print("Figure save in ../image/system.png")
 
 animation_densities()
 animation_velocities_electron()

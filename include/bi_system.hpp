@@ -200,34 +200,22 @@ class bi_system{
         }
 
         void save_datas(std::vector<double>& t_grid, std::vector<double>& kx_grid, std::vector<double>& x_grid){
-            int Nt = t_grid.size(), Nx = x_grid.size();   
-        
-            // Eigen::MatrixXd n1e_real, n1i_real, E_real, B_real;
-            // std::vector<Eigen::MatrixXd> U1e_real(2), U1i_real(2);
-            // U1e_real[0].resize(Nx, Nt); U1e_real[0].setZero(); U1e_real[1].resize(Nx, Nt); U1e_real[1].setZero();
-            // U1i_real[0].resize(Nx, Nt); U1i_real[0].setZero(); U1i_real[1].resize(Nx, Nt); U1i_real[1].setZero();
-            // inverse_fourier_transform(m_electron.m_n1, n1e_real, t_grid, kx_grid, x_grid);
-            // inverse_fourier_transform(m_ion.m_n1, n1i_real, t_grid, kx_grid, x_grid);
-            // inverse_fourier_transform(m_electron.m_U1[0], U1e_real[0], t_grid, kx_grid, x_grid);
-            // inverse_fourier_transform(m_electron.m_U1[1], U1e_real[1], t_grid, kx_grid, x_grid);
-            // inverse_fourier_transform(m_ion.m_U1[0], U1i_real[0], t_grid, kx_grid, x_grid);
-            // inverse_fourier_transform(m_ion.m_U1[1], U1i_real[1], t_grid, kx_grid, x_grid);
-            // inverse_fourier_transform(m_field.m_E1, E_real, t_grid, kx_grid, x_grid);
-            // inverse_fourier_transform(m_field.m_B1, B_real, t_grid, kx_grid, x_grid);
+            // Stream inverse Fourier transforms directly to files to save memory
+            inverse_fourier_transform_to_csv(m_electron.m_n1, t_grid, kx_grid, x_grid, "../data/n1e_real.txt");
+            inverse_fourier_transform_to_csv(m_ion.m_n1, t_grid, kx_grid, x_grid, "../data/n1i_real.txt");
+            inverse_fourier_transform_to_csv(m_electron.m_U1[0], t_grid, kx_grid, x_grid, "../data/U1e_real_x.txt");
+            inverse_fourier_transform_to_csv(m_electron.m_U1[1], t_grid, kx_grid, x_grid, "../data/U1e_real_y.txt");
+            inverse_fourier_transform_to_csv(m_ion.m_U1[0],t_grid, kx_grid, x_grid, "../data/U1i_real_x.txt");
+            inverse_fourier_transform_to_csv(m_ion.m_U1[1], t_grid, kx_grid, x_grid, "../data/U1i_real_y.txt");
+            inverse_fourier_transform_to_csv(m_field.m_E1, t_grid, kx_grid, x_grid, "../data/E_real.txt");
+            inverse_fourier_transform_to_csv(m_field.m_B1, t_grid, kx_grid, x_grid, "../data/B_real.txt");
 
+            // Write grids first
             save_vector_to_txt(t_grid, "../data/t_grid.txt");
             save_vector_to_txt(kx_grid, "../data/kx_grid.txt");
             save_vector_to_txt(x_grid, "../data/x_grid.txt");
 
-            // save_matrix_to_txt(n1e_real, "../data/n1e_real.txt");
-            // save_matrix_to_txt(n1i_real, "../data/n1i_real.txt");
-            // save_matrix_to_txt(U1e_real[0], "../data/U1e_real_x.txt");
-            // save_matrix_to_txt(U1e_real[1], "../data/U1e_real_y.txt");
-            // save_matrix_to_txt(U1i_real[0], "../data/U1i_real_x.txt");
-            // save_matrix_to_txt(U1i_real[1], "../data/U1i_real_y.txt");
-            // save_matrix_to_txt(E_real, "../data/E_real.txt");
-            // save_matrix_to_txt(B_real, "../data/B_real.txt");
-
+            // Eigenvalues (unchanged)
             save_eigevalues("../data/eigenvalues_long.txt", "../data/eigenvalues_trans.txt");
         }
 
