@@ -9,3 +9,16 @@ namespace consts{
     const double mp = 1.67262192369e-27; // Proton mass (kg)
     const double kB = 1.380649e-23; // Boltzmann constant (J/K)
 }
+
+// Plasma simulation parameters
+struct PlasmaParams {
+    // Species properties (s = i for ions, e for electrons)
+    double m_i, m_e;           // Mass [kg]
+    double q_i, q_e;           // Charge [C]
+    double n_i0, n_e0;         // Background density [m^-3]
+    double P_i0, P_e0;         // Background pressure [Pa]
+    double gamma_i, gamma_e;   // Adiabatic coefficient
+    
+    // Physical constants
+    double epsilon_0;          // Vacuum permittivity [F/m]
+};
