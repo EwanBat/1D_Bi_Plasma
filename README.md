@@ -16,9 +16,11 @@ The code solves the following system of equations:
 
 2. **Momentum equation** (for species s = i, e):
    
-   $$ \frac{\partial u_{s1}}{\partial t} + u_{s1} \frac{\partial u_{s1}}{\partial x} + \frac{1}{n_s \cdot m_s} \frac{\partial P_s}{\partial x} = \frac{q_s E}{m_s} - $$
+   $$ \frac{\partial u_{s1}}{\partial t} + u_{s1} \frac{\partial u_{s1}}{\partial x} = \frac{q_s E}{m_s} - \frac{1}{m_s n_s}\frac{\partial P_{s}}{\partial x} $$
 
-   $$ \frac{1}{\partial n_{s}} \frac{\partial P_{s}}{\partial x} = \frac{P_{s0}}{n_{s0}} [\frac{\gamma_s}{n_{s0}}\frac{\partial n_{s1}}{\partial x}(1 + \frac{(\gamma_s n_{s1})}{n_{s0}}) - 2\frac{(\gamma_s n_{s1})}{n_{s0}^2} \frac{\partial n_{s1}}{\partial x}] $$
+   With the pressure gradient:
+
+   $$ \frac{1}{n_{s}} \frac{\partial P_{s}}{\partial x} = \frac{P_{s0}}{n_{s0}} \left[\frac{\gamma_s}{n_{s0}}\frac{\partial n_{s1}}{\partial x}\left(1 + \frac{\gamma_s n_{s1}}{n_{s0}}\right) - 2\frac{\gamma_s n_{s1}}{n_{s0}^2} \frac{\partial n_{s1}}{\partial x}\right] $$
 
 3. **Poisson's equation**:
    
@@ -37,7 +39,11 @@ Where:
 - **Spatial discretization**: Upwind scheme for advection terms, centered differences for pressure gradients
 - **Time integration**: Explicit Euler method with CFL condition
 - **Boundary conditions**: Periodic
-- **CFL condition**: $$\Delta t \leq \text{cfl\_factor} \times \frac{\Delta x}{v_{\text{max}}}$$ where $$v_{\text{max}}$$ is the maximum wave speed
+- **CFL condition**: 
+
+$$ \Delta t \leq \text{cfl} \times \frac{\Delta x}{C_s} $$ 
+
+where $C_s$ is the characteristic sound speed of the plasma.
 
 ## Dependencies
 
