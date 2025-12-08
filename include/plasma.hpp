@@ -38,6 +38,14 @@ public:
     // Physical parameters
     PlasmaParams params;
     
+private:
+    // Membres pour les fichiers ouverts
+    std::ofstream file_t, file_n_i1, file_u_i1, file_n_e1, file_u_e1, file_E;
+    
+    // Ajoutez des vecteurs temporaires comme membres pour éviter les réallocations
+    Eigen::VectorXd dn_i1_dt, du_i1_dt, dn_e1_dt, du_e1_dt, dE_dx;
+
+public:
     /**
      * @brief Constructor
      */
@@ -49,6 +57,13 @@ public:
         n_e1.resize(Nx); n_e1.setZero();
         u_e1.resize(Nx); u_e1.setZero();
         E.resize(Nx); E.setZero();
+        
+        // Initialiser les vecteurs temporaires
+        dn_i1_dt.resize(Nx);
+        du_i1_dt.resize(Nx);
+        dn_e1_dt.resize(Nx);
+        du_e1_dt.resize(Nx);
+        dE_dx.resize(Nx);
         
         // Initialize dt with CFL condition
         dt = compute_cfl_timestep();
@@ -120,13 +135,11 @@ public:
      */
     double pressure_gradient(const Eigen::VectorXd& n_s1, int i, 
                             double n_s0, double P_s0, double gamma_s) const {
-        double dn_dx = derivative_x_centered(n_s1, i);  // Utilise le schéma centré
-        double n_s = n_s0 + n_s1(i);
+        const double dn_dx = derivative_x_centered(n_s1, i);
+        const double n_s = n_s0 + n_s1(i);
         
-        // (1/(n_s*m_s)) * dP_s/dx = P_s0 / n_s0 * [gamma_s/n_s0 * dn_s1/dx * (1 + gamma_s*n_s1/n_s0) 
-        //                                           - 2*gamma_s/n_s0^2 * n_s1 * dn_s1/dx]
-        double term1 = gamma_s / n_s0 * dn_dx * (1.0 + gamma_s * n_s1(i) / n_s0);
-        double term2 = 2.0 * gamma_s / (n_s0 * n_s0) * n_s1(i) * dn_dx;
+        const double term1 = gamma_s / n_s0 * dn_dx * (1.0 + gamma_s * n_s1(i) / n_s0);
+        const double term2 = 2.0 * gamma_s / (n_s0 * n_s0) * n_s1(i) * dn_dx;
         
         return (P_s0 / n_s0) * (term1 - term2);
     }
@@ -136,30 +149,29 @@ public:
      * E field must be computed before calling this
      */
     void compute_derivatives(Eigen::VectorXd& dn_i1_dt, Eigen::VectorXd& du_i1_dt,
-                            Eigen::VectorXd& dn_e1_dt, Eigen::VectorXd& du_e1_dt,
-                            Eigen::VectorXd& E) {
+                            Eigen::VectorXd& dn_e1_dt, Eigen::VectorXd& du_e1_dt) {
         
         // For each spatial point, compute time derivatives
         for (int i = 0; i < Nx; ++i) {
             // Ion continuity equation (equation 1 for ions) - schéma upwind
-            double du_i1_dx = derivative_x_upwind(u_i1, i, params.n_i0 + n_i1(i));
-            double dn_i1_dx = derivative_x_upwind(n_i1, i, u_i1(i));
+            const double du_i1_dx = derivative_x_upwind(u_i1, i, params.n_i0 + n_i1(i));
+            const double dn_i1_dx = derivative_x_upwind(n_i1, i, u_i1(i));
             dn_i1_dt(i) = -(params.n_i0 + n_i1(i)) * du_i1_dx - u_i1(i) * dn_i1_dx;
             
             // Ion momentum equation (equation 2 for ions)
-            double du_i1_dx_u = derivative_x_upwind(u_i1, i, u_i1(i));  // Schéma upwind pour l'advection
-            double dP_i_dx = pressure_gradient(n_i1, i, params.n_i0, params.P_i0, params.gamma_i);
+            const double du_i1_dx_u = derivative_x_upwind(u_i1, i, u_i1(i));
+            const double dP_i_dx = pressure_gradient(n_i1, i, params.n_i0, params.P_i0, params.gamma_i);
             du_i1_dt(i) = -u_i1(i) * du_i1_dx_u - dP_i_dx / params.m_i 
                          + params.q_i * E(i) / params.m_i;
             
             // Electron continuity equation (equation 1 for electrons) - schéma upwind
-            double du_e1_dx = derivative_x_upwind(u_e1, i, params.n_e0 + n_e1(i));
-            double dn_e1_dx = derivative_x_upwind(n_e1, i, u_e1(i));
+            const double du_e1_dx = derivative_x_upwind(u_e1, i, params.n_e0 + n_e1(i));
+            const double dn_e1_dx = derivative_x_upwind(n_e1, i, u_e1(i));
             dn_e1_dt(i) = -(params.n_e0 + n_e1(i)) * du_e1_dx - u_e1(i) * dn_e1_dx;
             
             // Electron momentum equation (equation 2 for electrons)
-            double du_e1_dx_u = derivative_x_upwind(u_e1, i, u_e1(i));  // Schéma upwind pour l'advection
-            double dP_e_dx = pressure_gradient(n_e1, i, params.n_e0, params.P_e0, params.gamma_e);
+            const double du_e1_dx_u = derivative_x_upwind(u_e1, i, u_e1(i));
+            const double dP_e_dx = pressure_gradient(n_e1, i, params.n_e0, params.P_e0, params.gamma_e);
             du_e1_dt(i) = -u_e1(i) * du_e1_dx_u - dP_e_dx / params.m_e 
                          + params.q_e * E(i) / params.m_e;
         }
@@ -171,38 +183,29 @@ public:
     void step_euler() {
         // Update dt based on current state (CFL condition)
         dt = compute_cfl_timestep();
-        
-        Eigen::VectorXd dn_i1_dt(Nx), du_i1_dt(Nx);
-        Eigen::VectorXd dn_e1_dt(Nx), du_e1_dt(Nx);
-        Eigen::VectorXd dE_dx(Nx);
-        
+                
         // First, compute E from Poisson's equation: dE/dx = rho/epsilon_0
-        // Integrate to get E
         dE_dx(0) = 0.0;
         for (int i = 0; i < Nx; ++i) {
-            double charge_density = params.q_i * n_i1(i) + params.q_e * n_e1(i);
+            const double charge_density = params.q_i * n_i1(i) + params.q_e * n_e1(i);
             dE_dx(i) = charge_density / params.epsilon_0;
         }
         
         // Integrate dE/dx to get E(x)
-        E(0) = 0.0; // Boundary condition
+        E(0) = E(Nx-1); // Boundary condition
         for (int i = 1; i < Nx; ++i) {
             E(i) = E(i-1) + dE_dx(i) * dx;
         }
         
         // Now compute time derivatives using current E field
-        compute_derivatives(dn_i1_dt, du_i1_dt, dn_e1_dt, du_e1_dt, dE_dx);
+        compute_derivatives(dn_i1_dt, du_i1_dt, dn_e1_dt, du_e1_dt);
         
         // Update state variables
-        n_i1 += dt * dn_i1_dt;
-        u_i1 += dt * du_i1_dt;
-        n_e1 += dt * dn_e1_dt;
-        u_e1 += dt * du_e1_dt;
+        n_i1.noalias() += dt * dn_i1_dt;
+        u_i1.noalias() += dt * du_i1_dt;
+        n_e1.noalias() += dt * dn_e1_dt;
+        u_e1.noalias() += dt * du_e1_dt;
     }
-    
-private:
-    // Membres pour les fichiers ouverts
-    std::ofstream file_t, file_n_i1, file_u_i1, file_n_e1, file_u_e1, file_E;
     
 public:
     /**
@@ -321,7 +324,7 @@ public:
                       << std::flush;
         }
         
-        close_time_files();  // Fermer proprement les fichiers
+        close_time_files();
         
         std::cout << std::endl << "Datas saved in data/ | " << step << " steps" << std::endl;
         std::cout << "=============================" << std::endl;
@@ -334,15 +337,10 @@ public:
                                    double x0, double sigma_x, double amplitude,
                                    double E_amplitude = 0.0) {
         for (int i = 0; i < Nx; ++i) {
-            double x = x_grid[i];
-            double gauss = amplitude * std::exp(-0.5 * std::pow((x - x0) / sigma_x, 2));
+            const double x = x_grid[i];
+            const double gauss = amplitude * std::exp(-0.5 * std::pow((x - x0) / sigma_x, 2));
             n_i1(i) = params.n_i0 * gauss;
             n_e1(i) = params.n_e0 * gauss;
-            
-            // // Perturbation sur le champ électrique
-            // if (E_amplitude != 0.0) {
-            //     E(i) = E_amplitude * std::exp(-0.5 * std::pow((x - x0) / sigma_x, 2));
-            // }
         }
     }
 };

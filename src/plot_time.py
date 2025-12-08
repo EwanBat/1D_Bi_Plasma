@@ -107,7 +107,6 @@ plt.colorbar(im, ax=ax, label=r"$n_{i1}$ [m$^3$]")
 plt.tight_layout()
 plt.savefig("../image/time_evolution.png", dpi=150)
 print("Figure sauvegardée: ../image/time_evolution.png")
-plt.show()
 
 # # Créer une animation (optionnel)
 # print("\nCréation de l'animation...")

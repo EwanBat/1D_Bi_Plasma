@@ -12,7 +12,7 @@ int main() {
     double dx = (xf - x0) / (Nx - 1);
     
     double t0 = 0.0;           // Start time [s]
-    double tf = 5.0e-8;        // End time [s]
+    double tf = 1e-7;        // End time [s]
     
     std::cout << "=== Simulation Parameters ===" << std::endl;
     std::cout << "Spatial domain: [" << x0 << ", " << xf << "] m" << std::endl;
@@ -39,8 +39,8 @@ int main() {
     params.P_e0 = params.n_e0 * consts::kB * T_e;  // Electron pressure [Pa]
     
     // Adiabatic coefficients
-    params.gamma_i = 3.0;                 // Ion adiabatic coefficient
-    params.gamma_e = 3.0;                 // Electron adiabatic coefficient
+    params.gamma_i = 3.0;                 // Ion adiabatic coefficient (gamma = 3)
+    params.gamma_e = 1.0;                 // Electron adiabatic coefficient (gamma = 1)
     
     // Physical constants
     params.epsilon_0 = consts::epsilon0;  // Vacuum permittivity [F/m]
