@@ -74,22 +74,42 @@ public:
         double v_max = std::max(v_max_i, v_max_e);
         
         // CFL condition
-        return cfl_factor * dx / v_max;
+        double dt_cfl = cfl_factor * dx / v_max;
+        return dt_cfl;
+    }
+    
+    /**
+     * @brief Compute spatial derivative using upwind scheme
+     * Upwind: uses backward difference if u > 0, forward if u < 0
+     */
+    double derivative_x_upwind(const Eigen::VectorXd& f, int i, double u) const {
+        if (u > 0.0) {
+            // Backward difference (upwind for positive velocity)
+            if (i == 0) {
+                return (f(i) - f(Nx-1)) / dx;  // Periodic boundary
+            } else {
+                return (f(i) - f(i-1)) / dx;
+            }
+        } else {
+            // Forward difference (upwind for negative velocity)
+            if (i == Nx - 1) {
+                return (f(0) - f(i)) / dx;  // Periodic boundary
+            } else {
+                return (f(i+1) - f(i)) / dx;
+            }
+        }
     }
     
     /**
      * @brief Compute spatial derivative using centered finite differences
-     * with mirror boundary conditions
+     * Used for pressure gradient terms (non-advective)
      */
-    double derivative_x(const Eigen::VectorXd& f, int i) const {
+    double derivative_x_centered(const Eigen::VectorXd& f, int i) const {
         if (i == 0) {
-            // Periodic boundary: df/dx = 0 at left boundary
-            return (f(1) - f(0)) / dx;
+            return (f(1) - f(Nx-1)) / (2.0 * dx);  // Periodic boundary
         } else if (i == Nx - 1) {
-            // Periodic boundary: df/dx = 0 at right boundary
-            return (f(0) - f(Nx-1)) / dx;
+            return (f(0) - f(Nx-2)) / (2.0 * dx);  // Periodic boundary
         } else {
-            // Centered difference
             return (f(i+1) - f(i-1)) / (2.0 * dx);
         }
     }
@@ -100,7 +120,7 @@ public:
      */
     double pressure_gradient(const Eigen::VectorXd& n_s1, int i, 
                             double n_s0, double P_s0, double gamma_s) const {
-        double dn_dx = derivative_x(n_s1, i);
+        double dn_dx = derivative_x_centered(n_s1, i);  // Utilise le schéma centré
         double n_s = n_s0 + n_s1(i);
         
         // (1/(n_s*m_s)) * dP_s/dx = P_s0 / n_s0 * [gamma_s/n_s0 * dn_s1/dx * (1 + gamma_s*n_s1/n_s0) 
@@ -117,28 +137,28 @@ public:
      */
     void compute_derivatives(Eigen::VectorXd& dn_i1_dt, Eigen::VectorXd& du_i1_dt,
                             Eigen::VectorXd& dn_e1_dt, Eigen::VectorXd& du_e1_dt,
-                            Eigen::VectorXd& dE_dx) {
+                            Eigen::VectorXd& E) {
         
         // For each spatial point, compute time derivatives
         for (int i = 0; i < Nx; ++i) {
-            // Ion continuity equation (equation 1 for ions)
-            double du_i1_dx = derivative_x(u_i1, i);
-            double dn_i1_dx = derivative_x(n_i1, i);
+            // Ion continuity equation (equation 1 for ions) - schéma upwind
+            double du_i1_dx = derivative_x_upwind(u_i1, i, params.n_i0 + n_i1(i));
+            double dn_i1_dx = derivative_x_upwind(n_i1, i, u_i1(i));
             dn_i1_dt(i) = -(params.n_i0 + n_i1(i)) * du_i1_dx - u_i1(i) * dn_i1_dx;
             
             // Ion momentum equation (equation 2 for ions)
-            double du_i1_dx_u = derivative_x(u_i1, i);
+            double du_i1_dx_u = derivative_x_upwind(u_i1, i, u_i1(i));  // Schéma upwind pour l'advection
             double dP_i_dx = pressure_gradient(n_i1, i, params.n_i0, params.P_i0, params.gamma_i);
             du_i1_dt(i) = -u_i1(i) * du_i1_dx_u - dP_i_dx / params.m_i 
                          + params.q_i * E(i) / params.m_i;
             
-            // Electron continuity equation (equation 1 for electrons)
-            double du_e1_dx = derivative_x(u_e1, i);
-            double dn_e1_dx = derivative_x(n_e1, i);
+            // Electron continuity equation (equation 1 for electrons) - schéma upwind
+            double du_e1_dx = derivative_x_upwind(u_e1, i, params.n_e0 + n_e1(i));
+            double dn_e1_dx = derivative_x_upwind(n_e1, i, u_e1(i));
             dn_e1_dt(i) = -(params.n_e0 + n_e1(i)) * du_e1_dx - u_e1(i) * dn_e1_dx;
             
             // Electron momentum equation (equation 2 for electrons)
-            double du_e1_dx_u = derivative_x(u_e1, i);
+            double du_e1_dx_u = derivative_x_upwind(u_e1, i, u_e1(i));  // Schéma upwind pour l'advection
             double dP_e_dx = pressure_gradient(n_e1, i, params.n_e0, params.P_e0, params.gamma_e);
             du_e1_dt(i) = -u_e1(i) * du_e1_dx_u - dP_e_dx / params.m_e 
                          + params.q_e * E(i) / params.m_e;
@@ -180,11 +200,16 @@ public:
         u_e1 += dt * du_e1_dt;
     }
     
+private:
+    // Membres pour les fichiers ouverts
+    std::ofstream file_t, file_n_i1, file_u_i1, file_n_e1, file_u_e1, file_E;
+    
+public:
     /**
      * @brief Initialize time evolution output files
      */
     void init_time_files(const std::vector<double>& x_grid, const std::string& prefix = "../data/") {
-        // Sauvegarder la grille spatiale (une seule fois)
+        // Sauvegarder la grille spatiale
         std::ofstream file_x(prefix + "x_grid.txt");
         if (!file_x.is_open()) {
             std::cerr << "Erreur: Impossible d'ouvrir " << prefix << "x_grid.txt" << std::endl;
@@ -195,13 +220,19 @@ public:
         }
         file_x.close();
         
-        // Créer/vider les fichiers de données temporelles
-        std::ofstream(prefix + "time.txt").close();
-        std::ofstream(prefix + "n_i1_time.txt").close();
-        std::ofstream(prefix + "u_i1_time.txt").close();
-        std::ofstream(prefix + "n_e1_time.txt").close();
-        std::ofstream(prefix + "u_e1_time.txt").close();
-        std::ofstream(prefix + "E_time.txt").close();
+        // Ouvrir les fichiers et les garder ouverts
+        file_t.open(prefix + "time.txt");
+        file_n_i1.open(prefix + "n_i1_time.txt");
+        file_u_i1.open(prefix + "u_i1_time.txt");
+        file_n_e1.open(prefix + "n_e1_time.txt");
+        file_u_e1.open(prefix + "u_e1_time.txt");
+        file_E.open(prefix + "E_time.txt");
+        
+        if (!file_t.is_open() || !file_n_i1.is_open() || !file_u_i1.is_open() || 
+            !file_n_e1.is_open() || !file_u_e1.is_open() || !file_E.is_open()) {
+            std::cerr << "Erreur: Impossible d'ouvrir les fichiers de sortie" << std::endl;
+            return;
+        }
         
         std::cout << "Fichiers temporels initialisés dans " << prefix << std::endl;
     }
@@ -209,25 +240,11 @@ public:
     /**
      * @brief Append current state to time evolution files
      */
-    void append_time_data(double t, const std::string& prefix = "../data/") {
-        // Ouvrir tous les fichiers en mode append
-        std::ofstream file_t(prefix + "time.txt", std::ios::app);
-        std::ofstream file_n_i1(prefix + "n_i1_time.txt", std::ios::app);
-        std::ofstream file_u_i1(prefix + "u_i1_time.txt", std::ios::app);
-        std::ofstream file_n_e1(prefix + "n_e1_time.txt", std::ios::app);
-        std::ofstream file_u_e1(prefix + "u_e1_time.txt", std::ios::app);
-        std::ofstream file_E(prefix + "E_time.txt", std::ios::app);
-        
-        if (!file_t.is_open() || !file_n_i1.is_open() || !file_u_i1.is_open() || 
-            !file_n_e1.is_open() || !file_u_e1.is_open() || !file_E.is_open()) {
-            std::cerr << "Erreur: Impossible d'ouvrir les fichiers temporels dans " << prefix << std::endl;
-            return;
-        }
-        
-        // Sauvegarder le temps
+    void append_time_data(double t) {
+        // Écrire le temps
         file_t << t << "\n";
         
-        // Sauvegarder toutes les valeurs spatiales sur une ligne, séparées par des espaces
+        // Écrire les données spatiales
         for (int i = 0; i < Nx; ++i) {
             file_n_i1 << n_i1(i);
             file_u_i1 << u_i1(i);
@@ -250,12 +267,28 @@ public:
         file_u_e1 << "\n";
         file_E << "\n";
         
-        file_t.close();
-        file_n_i1.close();
-        file_u_i1.close();
-        file_n_e1.close();
-        file_u_e1.close();
-        file_E.close();
+        // Flush périodique (par exemple tous les 100 pas)
+        static int flush_counter = 0;
+        if (++flush_counter % 100 == 0) {
+            file_t.flush();
+            file_n_i1.flush();
+            file_u_i1.flush();
+            file_n_e1.flush();
+            file_u_e1.flush();
+            file_E.flush();
+        }
+    }
+    
+    /**
+     * @brief Close output files
+     */
+    void close_time_files() {
+        if (file_t.is_open()) file_t.close();
+        if (file_n_i1.is_open()) file_n_i1.close();
+        if (file_u_i1.is_open()) file_u_i1.close();
+        if (file_n_e1.is_open()) file_n_e1.close();
+        if (file_u_e1.is_open()) file_u_e1.close();
+        if (file_E.is_open()) file_E.close();
     }
     
     /**
@@ -267,26 +300,31 @@ public:
         std::vector<double> x_grid(Nx);
         for (int i = 0; i < Nx; ++i) {
             x_grid[i] = i * dx;
-        };
+        }
         
-        // Initialize output files
         std::cout << "\n=== Initializing output files ===" << std::endl;
-        init_time_files(x_grid);
+        init_time_files(x_grid, prefix);
         
         std::cout << "Starting simulation..." << std::endl;
         
         while (t < tf) {
             step_euler();
+            if (t == 0.0){
+                std::cout << "dt initial: " << dt << " s" << std::endl;
+            }
             t += dt;
             step++;
-            append_time_data(t, prefix);
+            append_time_data(t);
             
-            // Afficher la progression sur une seule ligne
             std::cout << "\rProgress: " << std::fixed << std::setprecision(2) 
                       << (t/tf)*100.0 << "% | Step: " << step 
                       << std::flush;
         }
-        std::cout << std::endl << "Datas saved in data/" << step << std::endl;
+        
+        close_time_files();  // Fermer proprement les fichiers
+        
+        std::cout << std::endl << "Datas saved in data/ | " << step << " steps" << std::endl;
+        std::cout << "=============================" << std::endl;
     }
     
     /**
@@ -301,10 +339,10 @@ public:
             n_i1(i) = params.n_i0 * gauss;
             n_e1(i) = params.n_e0 * gauss;
             
-            // Perturbation sur le champ électrique
-            if (E_amplitude != 0.0) {
-                E(i) = E_amplitude * std::exp(-0.5 * std::pow((x - x0) / sigma_x, 2));
-            }
+            // // Perturbation sur le champ électrique
+            // if (E_amplitude != 0.0) {
+            //     E(i) = E_amplitude * std::exp(-0.5 * std::pow((x - x0) / sigma_x, 2));
+            // }
         }
     }
 };

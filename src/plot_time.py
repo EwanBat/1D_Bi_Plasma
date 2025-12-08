@@ -33,13 +33,13 @@ if n_i1_time.ndim == 1:
     E_time = E_time.reshape(1, -1)
 
 Nt = len(time)
-print(f"Nombre de pas de temps sauvegardés: {Nt}")
-print(f"Nombre de points spatiaux: {len(x_grid)}")
-print(f"Temps min: {time[0]*1e6:.3f} μs, max: {time[-1]*1e6:.3f} μs")
+print(f"Total number of temporal points saved: {Nt}")
+print(f"Number of spatial points: {len(x_grid)}")
+print(f"Time min: {time[0]*1e9:.3f} ns, max: {time[-1]*1e9:.3f} ns")
 
 # Créer une figure avec plusieurs sous-graphiques
 fig, axes = plt.subplots(3, 2, figsize=(14, 10))
-fig.suptitle("Évolution temporelle du plasma 1D", fontsize=16)
+fig.suptitle("Temporal evolution of 1D plasma", fontsize=16)
 
 # Graphiques individuels à différents instants
 n_snapshots = min(5, Nt)
@@ -48,50 +48,50 @@ snapshot_indices = np.linspace(0, Nt-1, n_snapshots, dtype=int)
 # 1. Densité ionique
 ax = axes[0, 0]
 for idx in snapshot_indices:
-    ax.plot(x_grid, n_i1_time[idx, :], label=f"t={time[idx]*1e6:.2f} μs")
+    ax.plot(x_grid, n_i1_time[idx, :], label=f"t={time[idx]*1e9:.2f} ns")
 ax.set_xlabel("Position x [m]")
-ax.set_ylabel("n_i1 [m⁻³]")
-ax.set_title("Perturbation densité ionique")
+ax.set_ylabel(r"$n_{i1}$ [m$^3$]")
+ax.set_title("Ion density perturbation")
 ax.legend()
 ax.grid(True)
 
 # 2. Vitesse ionique
 ax = axes[0, 1]
 for idx in snapshot_indices:
-    ax.plot(x_grid, u_i1_time[idx, :], label=f"t={time[idx]*1e6:.2f} μs")
+    ax.plot(x_grid, u_i1_time[idx, :], label=f"t={time[idx]*1e9:.2f} ns")
 ax.set_xlabel("Position x [m]")
-ax.set_ylabel("u_i1 [m/s]")
-ax.set_title("Perturbation vitesse ionique")
+ax.set_ylabel(r"$u_{i1}$ [m/s]")
+ax.set_title("Ion velocity perturbation")
 ax.legend()
 ax.grid(True)
 
 # 3. Densité électronique
 ax = axes[1, 0]
 for idx in snapshot_indices:
-    ax.plot(x_grid, n_e1_time[idx, :], label=f"t={time[idx]*1e6:.2f} μs")
+    ax.plot(x_grid, n_e1_time[idx, :], label=f"t={time[idx]*1e9:.2f} ns")
 ax.set_xlabel("Position x [m]")
-ax.set_ylabel("n_e1 [m⁻³]")
-ax.set_title("Perturbation densité électronique")
+ax.set_ylabel(r"$n_{e1}$ [m$^3$]")
+ax.set_title("Electron density perturbation")
 ax.legend()
 ax.grid(True)
 
 # 4. Vitesse électronique
 ax = axes[1, 1]
 for idx in snapshot_indices:
-    ax.plot(x_grid, u_e1_time[idx, :], label=f"t={time[idx]*1e6:.2f} μs")
+    ax.plot(x_grid, u_e1_time[idx, :], label=f"t={time[idx]*1e9:.2f} ns")
 ax.set_xlabel("Position x [m]")
-ax.set_ylabel("u_e1 [m/s]")
-ax.set_title("Perturbation vitesse électronique")
+ax.set_ylabel(r"$u_{e1}$ [m/s]")
+ax.set_title("Electron velocity perturbation")
 ax.legend()
 ax.grid(True)
 
 # 5. Champ électrique
 ax = axes[2, 0]
 for idx in snapshot_indices:
-    ax.plot(x_grid, E_time[idx, :], label=f"t={time[idx]*1e6:.2f} μs")
+    ax.plot(x_grid, E_time[idx, :], label=f"t={time[idx]*1e9:.2f} ns")
 ax.set_xlabel("Position x [m]")
 ax.set_ylabel("E [V/m]")
-ax.set_title("Champ électrique")
+ax.set_title("Electric field perturbation")
 ax.legend()
 ax.grid(True)
 
@@ -100,9 +100,9 @@ ax = axes[2, 1]
 extent = [x_grid[0], x_grid[-1], time[0]*1e6, time[-1]*1e6]
 im = ax.imshow(n_i1_time, aspect='auto', origin='lower', extent=extent, cmap='RdBu_r')
 ax.set_xlabel("Position x [m]")
-ax.set_ylabel("Temps [μs]")
-ax.set_title("Diagramme spatio-temporel n_i1")
-plt.colorbar(im, ax=ax, label="n_i1 [m⁻³]")
+ax.set_ylabel("Time [μs]")
+ax.set_title(r"Spatio-temporal diagram $n_{i1}$")
+plt.colorbar(im, ax=ax, label=r"$n_{i1}$ [m$^3$]")
 
 plt.tight_layout()
 plt.savefig("../image/time_evolution.png", dpi=150)

@@ -1,158 +1,130 @@
-# 1D Two-Fluid + Maxwell Plasma Simulation (C++ / Eigen)
+# 1D Bi-Plasma Simulation
+
+A C++ simulation code for modeling 1D fluid plasma dynamics with coupled ion and electron perturbations using finite difference methods.
 
 ## Description
 
-This project implements a **1D spectral simulation** of a collisionless plasma described by the **two-fluid model (ions + electrons)** coupled with **Maxwell’s equations**.  
-It evolves the perturbations in Fourier space and reconstructs the physical fields in real space.  
-Post-processing (plots, dispersion analysis) is done in Python.
+This project simulates the temporal evolution of a one-dimensional bi-species plasma system. It solves the coupled fluid equations for ion and electron density/velocity perturbations along with the electric field. The goal is to study wave propagation and instabilities in a plasma, keeping the second order terms.
 
----
+### Physical Model
 
-## Governing Equations
+The code solves the following system of equations:
 
-We consider small perturbations around a homogeneous, neutral plasma with no background magnetic field.  
-The two-fluid + Maxwell system (linearized) reads:
+1. **Continuity equation** (for species s = i, e):
+   $$
+   \frac{\partial n_{s1}}{\partial t} + (n_{s0} + n_{s1}) \frac{\partial u_{s1}}{\partial x} + u_{s1} \frac{\partial n_{s1}}{\partial x} = 0
+   $$
 
-### Continuity equations
-$$
-\partial_t \delta n_s + n_{0s} \partial_x \delta u_{s,x} = 0, \quad s \in \{e,i\}
-$$
+2. **Momentum equation** (for species s = i, e):
+   $$
+   \frac{\partial u_{s1}}{\partial t} + u_{s1} \frac{\partial u_{s1}}{\partial x} + \frac{1}{n_s \cdot m_s} \frac{\partial P_s}{\partial x} = \frac{q_s E}{m_s}
+   $$
 
-### Momentum equations
-$$
-m_s \partial_t \delta u_{s,x} = q_s \delta E_x,
-$$
-$$
-m_s \partial_t \delta u_{s,\perp} = q_s (\delta \mathbf{E}_\perp + \delta \mathbf{u}_{s,\perp}\times \mathbf{B}),
-$$
+   $$
+   \frac{1}{\partial n_{s}} \frac{\partial P_{s}}{\partial x} = \frac{P_{s0}}{n_{s0}} [\frac{\gamma_s}{\partial n_{s}}\frac{\partial n_{s1}}{\partial x}(1 + \frac{(\gamma_s n_{s1})}{n_{s0}}) - 2\frac{(\gamma_s n_{s1})}{n_{s0}^2} \frac{\partial n_{s1}}{\partial x}]
+   $$
 
-where \(s\) is the species index (electrons \(e\), ions \(i\)).
+3. **Poisson's equation**:
+   $$
+   \frac{\partial E}{\partial x} = \frac{1}{\varepsilon_0} (q_i n_{i1} + q_e n_{e1})
+   $$
 
-### Maxwell equations (1D geometry)
-- Longitudinal (electrostatic):
-$`i k \delta E_x = \frac{e}{\varepsilon_0}(\delta n_i - \delta n_e).`$
+Where:
+- `n_s1`: Density perturbation [m⁻³]
+- `u_s1`: Velocity perturbation [m/s]
+- `E`: Electric field [V/m]
+- `P_s`: Pressure [Pa]
+- `q_s`: Charge [C]
+- `m_s`: Mass [kg]
 
-- Transverse (electromagnetic):
-$`\partial_t \delta E_y = c^2 \partial_x \delta B_z - \frac{1}{\varepsilon_0} \sum_s q_s n_{0s} \delta u_{s,y},`$
-$`\partial_t \delta B_z = - \partial_x \delta E_y.`$
+### Numerical Methods
 
----
+- **Spatial discretization**: Upwind scheme for advection terms, centered differences for pressure gradients
+- **Time integration**: Explicit Euler method with CFL condition
+- **Boundary conditions**: Periodic
+- **CFL condition**: $$\Delta t \leq \text{cfl\_factor} \times \frac{\Delta x}{v_{\text{max}}}$$ where $$v_{\text{max}}$$ is the maximum wave speed
 
-## Matrix Formulation
+## Dependencies
 
-For each Fourier mode \(k\), the system can be written as:
+- **C++ compiler** with C++11 support (g++, clang++)
+- **Eigen3** library (included in `include/Eigen/`)
+- **CMake** (version 3.10 or higher)
+- **Python 3** with matplotlib and numpy (for visualization)
 
-$$
-\frac{d}{dt} \mathbf{y}(k,t) = A(k)\,\mathbf{y}(k,t).
-$$
-
-### Longitudinal block (electrostatic, variables ($`\delta n_e, u_{e,x}, \delta n_i, u_{i,x})`$)):
-
-$$
-\mathbf{y}_L = 
-\begin{bmatrix}
-\delta n_e \\
-\delta n_i \\
-u_{e,x} \\
-u_{i,x}
-\end{bmatrix},
-$$
-
-$$
-A_L(k) =
-\begin{bmatrix}
-0 & 0 & -ik n_{0e} & 0 \\
-0 & 0 & 0 & -ik n_{0i} \\
-\frac{\omega_{pe}^2}{i k n_{0e}} - \frac{i c_{se}^2 k}{n_{0e}} & -\frac{\omega_{pe}^2}{i k n_{0e}} & 0 & 0 \\
--\frac{\omega_{pi}^2}{i k n_{0i}} & \frac{\omega_{pi}^2}{i k n_{0i}} - \frac{i c_{si}^2 k}{n_{0i}} k & 0 & 0
-\end{bmatrix}.
-$$
-
-This reproduces Langmuir and ion-acoustic modes.
-
----
-
-### Transverse block (electromagnetic, variables $`(u_{e,y}, u_{i,y}, E_y, B_z)`$):
-
-$$
-\mathbf{y}_T =
-\begin{bmatrix}
-u_{e,y} \\
-u_{i,y} \\
-E_y \\
-B_z
-\end{bmatrix},
-$$
-
-$$
-A_T(k) =
-\begin{bmatrix}
-0 & 0 & -\frac{e}{m_e} & 0 \\
-0 & 0 & \frac{e}{m_i} & 0 \\
-\frac{e n_{0e}}{\varepsilon_0} & -\frac{e n_{0i}}{\varepsilon_0} & 0 & i c^2 k \\
-0 & 0 & -i k & 0
-\end{bmatrix}.
-$$
-
-This reproduces electromagnetic plasma waves with dispersion
-$`\omega^2 = \omega_p^2 + c^2 k^2.`$
-
----
-
-<p align="center"> <img src="image/dispersion_longitudinal.png" width="600" alt="Propagation of the modes"/> </p>
-
-##  Project Structure
+## Project Structure
 
 ```
-1D_Bi_Plasma/
-├── CMakeLists.txt          # CMake build configuration
-├── README.md               # Project documentation
-├── .gitignore             # Git ignore rules
-├── build/                 # Build directory (generated by CMake)
-├── data/                  # Input and output data
-├── include/               # C++ header files
-│   ├── bi_system.hpp      # Two-fluid + Maxwell system definition
-│   ├── constants.hpp      # Physical and numerical constants
-│   ├── field.hpp          # Field storage and access
-│   ├── fourier.hpp        # Fourier transforms interface
-│   ├── plasma.hpp         # Plasma parameters and initialization
-│   └── Eigen/             # Eigen library (header-only)
-└── src/                   # C++ source files
-    ├── fourier.cpp        # Fourier transform implementation
-    ├── main.cpp           # Simulation entry point
-    └── plot.py            # Python visualization script
+.
+├── CMakeLists.txt          # CMake configuration file
+├── README.md               # This file
+├── include/
+│   ├── constants.hpp       # Physical constants
+│   ├── plasma.hpp          # PlasmaSystem class definition
+│   └── Eigen/              # Eigen library headers
+├── src/
+│   ├── main.cpp            # Main simulation program
+│   └── plot_time.py        # Python visualization script
+├── build/                  # Build directory
+├── data/                   # Output data files
+└── image/                  # Generated plots
 ```
 
-## Build & Run
+## Building the Project
 
-### Prerequisites
-- CMake (>= 3.10)
-- C++ compiler with C++17 support (g++, clang++)
-- Eigen library (included in the project)
-- Python 3.x with matplotlib and numpy (for visualization)
+1. **Create and navigate to the build directory**:
+   ```bash
+   mkdir -p build
+   cd build
+   ```
 
-### Compilation (Linux / macOS)
+2. **Configure with CMake**:
+   ```bash
+   cmake ..
+   ```
 
-```bash
-mkdir -p build
-cd build
-cmake ..
-make
-```
+3. **Compile**:
+   ```bash
+   make
+   ```
 
-### Running the Simulation
+This will generate the `bi_plasma` executable in the `build/` directory.
+
+## Running the Simulation
+
+From the `build/` directory:
 
 ```bash
 ./bi_plasma
 ```
 
-### Visualization
+The program will:
+1. Initialize the plasma system with a Gaussian density perturbation
+2. Run the time evolution simulation
+3. Save data to `data/` directory
+4. Automatically run the visualization script to generate plots
 
-Generate plots and analyze results:
-```bash
-cd ../src
-python plot.py
-```
+## Output Files
 
-## Author
-- Ewan Bataille
+The simulation generates the following data files in the `data/` directory:
+
+- `time.txt`: Time array [s]
+- `x_grid.txt`: Spatial grid [m]
+- `n_i1_time.txt`: Ion density perturbation evolution
+- `u_i1_time.txt`: Ion velocity perturbation evolution
+- `n_e1_time.txt`: Electron density perturbation evolution
+- `u_e1_time.txt`: Electron velocity perturbation evolution
+- `E_time.txt`: Electric field evolution
+
+Generated plots are saved in the `image/` directory.
+
+## Exemple of results
+
+<p align="center"> <img src="image/time_evolution.png" width="600" alt="Gaussian perturbation evolution"/> </p>
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Authors
+
+Ewan Bataille
