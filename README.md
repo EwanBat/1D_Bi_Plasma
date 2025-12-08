@@ -12,19 +12,19 @@ The code solves the following system of equations:
 
 1. **Continuity equation** (for species s = i, e):
    
-   $$ \frac{\partial n_{s1}}{\partial t} + (n_{s0} + n_{s1}) \frac{\partial u_{s1}}{\partial x} + u_{s1} \frac{\partial n_{s1}}{\partial x} = 0 $$
+$$ \frac{\partial n_{s1}}{\partial t} + (n_{s0} + n_{s1}) \frac{\partial u_{s1}}{\partial x} + u_{s1} \frac{\partial n_{s1}}{\partial x} = 0 $$
 
 2. **Momentum equation** (for species s = i, e):
    
-   $$ \frac{\partial u_{s1}}{\partial t} + u_{s1} \frac{\partial u_{s1}}{\partial x} = \frac{q_s E}{m_s} - \frac{1}{m_s n_s}\frac{\partial P_{s}}{\partial x} $$
+$$ \frac{\partial u_{s1}}{\partial t} + u_{s1} \frac{\partial u_{s1}}{\partial x} = \frac{q_s E}{m_s} - \frac{1}{m_s n_s}\frac{\partial P_{s}}{\partial x} $$
 
    With the pressure gradient:
 
-   $$ \frac{1}{n_{s}} \frac{\partial P_{s}}{\partial x} = \frac{P_{s0}}{n_{s0}} \left[\frac{\gamma_s}{n_{s0}}\frac{\partial n_{s1}}{\partial x}\left(1 + \frac{\gamma_s n_{s1}}{n_{s0}}\right) - 2\frac{\gamma_s n_{s1}}{n_{s0}^2} \frac{\partial n_{s1}}{\partial x}\right] $$
+$$ \frac{1}{n_{s}} \frac{\partial P_{s}}{\partial x} = \frac{P_{s0}}{n_{s0}} \left[\frac{\gamma_s}{n_{s0}}\frac{\partial n_{s1}}{\partial x}\left(1 + \frac{\gamma_s n_{s1}}{n_{s0}}\right) - 2\frac{\gamma_s n_{s1}}{n_{s0}^2} \frac{\partial n_{s1}}{\partial x}\right] $$
 
 3. **Poisson's equation**:
    
-   $$ \frac{\partial E}{\partial x} = \frac{1}{\varepsilon_0} (q_i n_{i1} + q_e n_{e1}) $$
+$$ \frac{\partial E}{\partial x} = \frac{1}{\varepsilon_0} (q_i n_{i1} + q_e n_{e1}) $$
 
 Where:
 - `n_s1`: Density perturbation [m⁻³]
