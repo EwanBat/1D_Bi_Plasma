@@ -12,7 +12,7 @@ int main() {
     double dx = (xf - x0) / (Nx - 1);
     
     double t0 = 0.0;           // Start time [s]
-    double tf = 1e-7;        // End time [s]
+    double tf = 5.45e-8;        // End time [s]
     
     std::cout << "=== Simulation Parameters ===" << std::endl;
     std::cout << "Spatial domain: [" << x0 << ", " << xf << "] m" << std::endl;
@@ -44,8 +44,8 @@ int main() {
     
     // Physical constants
     params.epsilon_0 = consts::epsilon0;  // Vacuum permittivity [F/m]
-    double Debye_length = std::sqrt(params.epsilon_0 * consts::kB * T_e / (params.n_e0 * consts::e * consts::e));
-    double plasma_frequency = std::sqrt(params.n_e0 * consts::e * consts::e / (params.m_e * params.epsilon_0));
+    const double Debye_length = std::sqrt(params.epsilon_0 * consts::kB * T_e / (params.n_e0 * consts::e * consts::e));
+    const double plasma_frequency = std::sqrt(params.n_e0 * consts::e * consts::e / (params.m_e * params.epsilon_0));
 
     std::cout << "\n=== Physical Parameters ===" << std::endl;
     std::cout << "Background density: " << params.n_i0 << " m^-3" << std::endl;
@@ -65,11 +65,12 @@ int main() {
     PlasmaSystem system(Nx, dx,params);
     
     // Set initial Gaussian perturbation
-    double gauss_center = 0.5 * (x0 + xf);  // Center of domain
-    double gauss_width = 1e-2;               // Width [m]
-    double gauss_amplitude = 1.0e-3;         // Relative amplitude (0.1%)
+    const double gauss_center = 0.5 * (x0 + xf);  // Center of domain
+    const double gauss_width = 1e-2;               // Width [m]
+    const double gauss_amplitude = 1.0e-3;         // Relative amplitude (0.1%)
+    const double E_amplitude = 1e1;               // Electric field amplitude [V/m]
     
-    system.set_gaussian_perturbation(x_grid, gauss_center, gauss_width, gauss_amplitude);
+    system.set_gaussian_perturbation(x_grid, gauss_center, gauss_width, gauss_amplitude, E_amplitude);
     
     std::cout << "\n=== Initial Perturbation ===" << std::endl;
     std::cout << "Gaussian center: " << gauss_center << " m" << std::endl;

@@ -76,20 +76,20 @@ public:
      */
     double compute_cfl_timestep() const {
         // Compute sound speeds for ions and electrons
-        double c_s_i = std::sqrt(params.gamma_i * params.P_i0 / (params.n_i0 * params.m_i));
-        double c_s_e = std::sqrt(params.gamma_e * params.P_e0 / (params.n_e0 * params.m_e));
+        const double c_s_i = std::sqrt(params.gamma_i * params.P_i0 / (params.n_i0 * params.m_i));
+        const double c_s_e = std::sqrt(params.gamma_e * params.P_e0 / (params.n_e0 * params.m_e));
         
         // Find maximum velocities
-        double u_i_max = u_i1.cwiseAbs().maxCoeff();
-        double u_e_max = u_e1.cwiseAbs().maxCoeff();
+        const double u_i_max = u_i1.cwiseAbs().maxCoeff();
+        const double u_e_max = u_e1.cwiseAbs().maxCoeff();
         
         // Maximum wave speeds (velocity + sound speed)
-        double v_max_i = u_i_max + c_s_i;
-        double v_max_e = u_e_max + c_s_e;
-        double v_max = std::max(v_max_i, v_max_e);
+        const double v_max_i = u_i_max + c_s_i;
+        const double v_max_e = u_e_max + c_s_e;
+        const double v_max = std::max(v_max_i, v_max_e);
         
         // CFL condition
-        double dt_cfl = cfl_factor * dx / v_max;
+        const double dt_cfl = cfl_factor * dx / v_max;
         return dt_cfl;
     }
     
@@ -183,19 +183,6 @@ public:
     void step_euler() {
         // Update dt based on current state (CFL condition)
         dt = compute_cfl_timestep();
-                
-        // First, compute E from Poisson's equation: dE/dx = rho/epsilon_0
-        dE_dx(0) = 0.0;
-        for (int i = 0; i < Nx; ++i) {
-            const double charge_density = params.q_i * n_i1(i) + params.q_e * n_e1(i);
-            dE_dx(i) = charge_density / params.epsilon_0;
-        }
-        
-        // Integrate dE/dx to get E(x)
-        E(0) = E(Nx-1); // Boundary condition
-        for (int i = 1; i < Nx; ++i) {
-            E(i) = E(i-1) + dE_dx(i) * dx;
-        }
         
         // Now compute time derivatives using current E field
         compute_derivatives(dn_i1_dt, du_i1_dt, dn_e1_dt, du_e1_dt);
@@ -205,6 +192,18 @@ public:
         u_i1.noalias() += dt * du_i1_dt;
         n_e1.noalias() += dt * dn_e1_dt;
         u_e1.noalias() += dt * du_e1_dt;
+
+        // Update E field using Poisson's equation (equation 3)
+        for (int i = 0; i < Nx; ++i) {
+            const double charge_density = params.q_i * n_i1(i) + params.q_e * n_e1(i);
+            dE_dx(i) = charge_density / params.epsilon_0;
+        }
+        
+        // Integrate dE/dx to get E using periodic boundary condition
+        E(0) = E(Nx-1);  // Periodic boundary condition
+        for (int i = 1; i < Nx; ++i) {
+            E(i) = E(i-1) + dE_dx(i-1) * dx;
+        }
     }
     
 public:
@@ -335,12 +334,12 @@ public:
      */
     void set_gaussian_perturbation(const std::vector<double>& x_grid, 
                                    double x0, double sigma_x, double amplitude,
-                                   double E_amplitude = 0.0) {
+                                   double E_amplitude) {
         for (int i = 0; i < Nx; ++i) {
             const double x = x_grid[i];
             const double gauss = amplitude * std::exp(-0.5 * std::pow((x - x0) / sigma_x, 2));
-            n_i1(i) = params.n_i0 * gauss;
-            n_e1(i) = params.n_e0 * gauss;
+            
+            E(i) = E_amplitude * std::exp(-0.5 * std::pow((x - x0) / sigma_x, 2));
         }
     }
 };
