@@ -7,7 +7,7 @@ namespace consts{
     const double e = 1.602176634e-19; // Elementary charge (C)
     const double me = 9.10938356e-31; // Electron mass (kg)
     const double mp = 1.67262192369e-27; // Proton mass (kg)
-    const double kB = 1.380649e-23; // Boltzmann constant (J/K)
+    const double k_B = 1.380649e-23; // Boltzmann constant (J/K)
 }
 
 // Plasma simulation parameters
@@ -18,6 +18,8 @@ struct PlasmaParams {
     double n_i0, n_e0;         // Background density [m^-3]
     double P_i0, P_e0;         // Background pressure [Pa]
     double gamma_i, gamma_e;   // Adiabatic coefficient
+    double T_i, T_e;           // Temperature [K]
+    double cs_e, cs_i;       // Sound speed [m/s]
     
     // Physical constants
     double epsilon_0;          // Vacuum permittivity [F/m]

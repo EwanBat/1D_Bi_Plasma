@@ -36,14 +36,18 @@ Where:
 
 ### Numerical Methods
 
-- **Spatial discretization**: Upwind scheme for advection terms, centered differences for pressure gradients
-- **Time integration**: Explicit Euler method with CFL condition
-- **Boundary conditions**: Periodic
-- **CFL condition**: 
+Le solveur implémente un **schéma volumes finis 1D d'ordre 2** pour la dynamique non linéaire du plasma électrostatique :
+
+- **Discrétisation spatiale** : Forme conservative avec reconstruction MUSCL (limiteur minmod) pour une précision d'ordre 2 tout en évitant les oscillations non physiques
+- **Flux numériques** : Schéma de Rusanov (Local Lax–Friedrichs) aux interfaces, garantissant robustesse et stabilité
+- **Intégration temporelle** : Schéma predictor–corrector de type MacCormack (ordre 2), avec passe prédictive (advection + sources) et passe corrective (reconstruction rétrograde + moyenne temporelle)
+- **Équation de Poisson** : Solveur linéaire tridiagonal sur différences finies centrées, résolu à chaque sous-étape pour une évolution auto-cohérente du champ électrique
+- **Conditions limites** : Périodiques
+- **Condition CFL** : 
 
 $$ \Delta t \leq \text{cfl} \times \frac{\Delta x}{C_s} $$ 
 
-where $C_s$ is the characteristic sound speed of the plasma.
+où $C_s$ est la vitesse du son caractéristique du plasma.
 
 ## Dependencies
 

@@ -108,41 +108,41 @@ plt.tight_layout()
 plt.savefig("../image/time_evolution.png", dpi=150)
 print("Figure sauvegardée: ../image/time_evolution.png")
 
-# # Créer une animation (optionnel)
-# print("\nCréation de l'animation...")
-# fig_anim, axes_anim = plt.subplots(2, 2, figsize=(12, 8))
-# fig_anim.suptitle("Animation de l'évolution temporelle", fontsize=14)
+# Créer une animation (optionnel)
+print("\nCréation de l'animation...")
+fig_anim, axes_anim = plt.subplots(2, 2, figsize=(12, 8))
+fig_anim.suptitle("Animation de l'évolution temporelle", fontsize=14)
 
-# lines = []
-# titles = ["Densité ionique n_i1", "Vitesse ionique u_i1", 
-#           "Densité électronique n_e1", "Champ électrique E"]
-# data_arrays = [n_i1_time, u_i1_time, n_e1_time, E_time]
-# ylabels = ["n_i1 [m⁻³]", "u_i1 [m/s]", "n_e1 [m⁻³]", "E [V/m]"]
+lines = []
+titles = ["Densité ionique n_i1", "Vitesse ionique u_i1", 
+          "Densité électronique n_e1", "Champ électrique E"]
+data_arrays = [n_i1_time, u_i1_time, n_e1_time, E_time]
+ylabels = ["n_i1 [m⁻³]", "u_i1 [m/s]", "n_e1 [m⁻³]", "E [V/m]"]
 
-# for idx, (ax, data, title, ylabel) in enumerate(zip(axes_anim.flat, data_arrays, titles, ylabels)):
-#     line, = ax.plot(x_grid, data[0, :], 'b-', lw=2)
-#     lines.append(line)
-#     ax.set_xlabel("Position x [m]")
-#     ax.set_ylabel(ylabel)
-#     ax.set_title(title)
-#     ax.grid(True)
+for idx, (ax, data, title, ylabel) in enumerate(zip(axes_anim.flat, data_arrays, titles, ylabels)):
+    line, = ax.plot(x_grid, data[0, :], 'b-', lw=2)
+    lines.append(line)
+    ax.set_xlabel("Position x [m]")
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.grid(True)
     
-#     # Définir les limites y
-#     ymin, ymax = data.min(), data.max()
-#     margin = 0.1 * (ymax - ymin) if ymax != ymin else 1
-#     ax.set_ylim(ymin - margin, ymax + margin)
+    # Définir les limites y
+    ymin, ymax = data.min(), data.max()
+    margin = 0.1 * (ymax - ymin) if ymax != ymin else 1
+    ax.set_ylim(ymin - margin, ymax + margin)
 
-# time_text = fig_anim.suptitle('', fontsize=12)
+time_text = fig_anim.suptitle('', fontsize=12)
 
-# def animate(frame):
-#     for line, data in zip(lines, data_arrays):
-#         line.set_ydata(data[frame, :])
-#     fig_anim.suptitle(f"Animation de l'évolution temporelle - Temps: {time[frame]*1e6:.3f} μs", fontsize=14)
-#     return lines
+def animate(frame):
+    for line, data in zip(lines, data_arrays):
+        line.set_ydata(data[frame, :])
+    fig_anim.suptitle(f"Animation de l'évolution temporelle - Temps: {time[frame]*1e6:.3f} μs", fontsize=14)
+    return lines
 
-# anim = FuncAnimation(fig_anim, animate, frames=Nt, interval=50, blit=True, repeat=True)
+anim = FuncAnimation(fig_anim, animate, frames=Nt, interval=50, blit=True, repeat=True)
 
-# plt.tight_layout(rect=[0, 0, 1, 0.93])
-# anim.save('../image/plasma_animation.gif', writer='pillow', fps=20)
-# print("Animation sauvegardée: ../image/plasma_animation.gif")
-# plt.show()
+plt.tight_layout(rect=[0, 0, 1, 0.93])
+anim.save('../image/plasma_animation.gif', writer='pillow', fps=20)
+print("Animation sauvegardée: ../image/plasma_animation.gif")
+plt.show()

@@ -9,10 +9,10 @@ int main() {
     double x0 = 0.0;           // Start position [m]
     double xf = 1e0;         // End position [m]
     int Nx = 200;              // Number of spatial points
-    double dx = (xf - x0) / (Nx - 1);
+    double dx = (xf - x0) / (Nx + 1);
     
     double t0 = 0.0;           // Start time [s]
-    double tf = 5.45e-8;        // End time [s]
+    double tf = 1e-8;        // End time [s]
     
     std::cout << "=== Simulation Parameters ===" << std::endl;
     std::cout << "Spatial domain: [" << x0 << ", " << xf << "] m" << std::endl;
@@ -33,10 +33,10 @@ int main() {
     params.n_e0 = 1.0e15;                 // Electron background density [m^-3]
     
     // Temperature and pressure (assuming T ~ 1 eV = 11600 K)
-    double T_i = 1000.0;                 // Ion temperature [K]
-    double T_e = 1000.0;                 // Electron temperature [K]
-    params.P_i0 = params.n_i0 * consts::kB * T_i;  // Ion pressure [Pa]
-    params.P_e0 = params.n_e0 * consts::kB * T_e;  // Electron pressure [Pa]
+    params.T_i = 10000.0;                 // Ion temperature [K]
+    params.T_e = 10000.0;                 // Electron temperature [K]
+    params.P_i0 = params.n_i0 * consts::k_B * params.T_i;  // Ion pressure [Pa]
+    params.P_e0 = params.n_e0 * consts::k_B * params.T_e;  // Electron pressure [Pa]
     
     // Adiabatic coefficients
     params.gamma_i = 3.0;                 // Ion adiabatic coefficient (gamma = 3)
@@ -44,8 +44,10 @@ int main() {
     
     // Physical constants
     params.epsilon_0 = consts::epsilon0;  // Vacuum permittivity [F/m]
-    const double Debye_length = std::sqrt(params.epsilon_0 * consts::kB * T_e / (params.n_e0 * consts::e * consts::e));
+    const double Debye_length = std::sqrt(params.epsilon_0 * consts::k_B * params.T_e / (params.n_e0 * consts::e * consts::e));
     const double plasma_frequency = std::sqrt(params.n_e0 * consts::e * consts::e / (params.m_e * params.epsilon_0));
+    params.cs_e = std::sqrt(consts::k_B * params.T_e / params.m_e); // Electron sound speed
+    params.cs_i = std::sqrt(consts::k_B * params.T_i / params.m_i); // Ion sound speed
 
     std::cout << "\n=== Physical Parameters ===" << std::endl;
     std::cout << "Background density: " << params.n_i0 << " m^-3" << std::endl;
@@ -68,7 +70,7 @@ int main() {
     const double gauss_center = 0.5 * (x0 + xf);  // Center of domain
     const double gauss_width = 1e-2;               // Width [m]
     const double gauss_amplitude = 1.0e-3;         // Relative amplitude (0.1%)
-    const double E_amplitude = 1e1;               // Electric field amplitude [V/m]
+    const double E_amplitude = 1e3;               // Electric field amplitude [V/m]
     
     system.set_gaussian_perturbation(x_grid, gauss_center, gauss_width, gauss_amplitude, E_amplitude);
     

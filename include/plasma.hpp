@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Eigen/Dense"
+#include "Eigen/src/Core/Matrix.h"
 #include "constants.hpp"
 #include <vector>
 #include <string>
@@ -42,170 +43,93 @@ private:
     // Membres pour les fichiers ouverts
     std::ofstream file_t, file_n_i1, file_u_i1, file_n_e1, file_u_e1, file_E;
     
-    // Ajoutez des vecteurs temporaires comme membres pour éviter les réallocations
-    Eigen::VectorXd dn_i1_dt, du_i1_dt, dn_e1_dt, du_e1_dt, dE_dx;
+    // Vecteurs temporaires pour éviter les réallocations
+    Eigen::VectorXd Phi, Phi_star;        // Electric potential [V]
+    Eigen::VectorXd E_star;        // Electric field at star step [V/m]
+
+    // Temporary vectors for calculations
+    Eigen::VectorXd n_iR, n_iL; // Right and left states for ions density
+    Eigen::VectorXd u_iR, u_iL; // Right and left states for ions velocity
+    Eigen::VectorXd n_eR, n_eL; // Right and left states for electrons density
+    Eigen::VectorXd u_eR, u_eL; // Right and left states for electrons velocity
+    Eigen::VectorXd n_e_star, n_i_star; // Star states for ions and electrons density
+    Eigen::VectorXd u_e_star, u_i_star; // Star states for ions and electrons velocity
+
+    // Fluxes
+    Eigen::VectorXd F_e_n, F_i_n; // Density fluxes
+    Eigen::VectorXd F_i_u, F_e_u; // Velocity fluxes
+
+    // Minmod
+    Eigen::VectorXd minmod_i_n, minmod_e_n; // Minmod slopes for densities
+    Eigen::VectorXd minmod_i_u, minmod_e_u; // Minmod slopes for velocities
 
 public:
     /**
      * @brief Constructor
      */
-    PlasmaSystem(int nx, double dx_val, const PlasmaParams& p, double cfl = 0.5) 
+    PlasmaSystem(int nx, double dx_val, const PlasmaParams& p, const double cfl = 0.5) 
         : Nx(nx), dx(dx_val), params(p), cfl_factor(cfl) {
         // Initialize state vectors
-        n_i1.resize(Nx); n_i1.setZero();
-        u_i1.resize(Nx); u_i1.setZero();
-        n_e1.resize(Nx); n_e1.setZero();
-        u_e1.resize(Nx); u_e1.setZero();
-        E.resize(Nx); E.setZero();
+        n_i1.resize(Nx+1); n_i1.setZero();
+        u_i1.resize(Nx+1); u_i1.setZero();
+        n_e1.resize(Nx+1); n_e1.setZero();
+        u_e1.resize(Nx+1); u_e1.setZero();
+        E.resize(Nx+1); E.setZero();
         
         // Initialiser les vecteurs temporaires
-        dn_i1_dt.resize(Nx);
-        du_i1_dt.resize(Nx);
-        dn_e1_dt.resize(Nx);
-        du_e1_dt.resize(Nx);
-        dE_dx.resize(Nx);
-        
-        // Initialize dt with CFL condition
-        dt = compute_cfl_timestep();
-    }
-    
-    /**
-     * @brief Compute timestep based on CFL condition
-     * CFL condition: dt <= cfl_factor * dx / v_max
-     * where v_max is the maximum wave speed in the system
-     */
-    double compute_cfl_timestep() const {
-        // Compute sound speeds for ions and electrons
-        const double c_s_i = std::sqrt(params.gamma_i * params.P_i0 / (params.n_i0 * params.m_i));
-        const double c_s_e = std::sqrt(params.gamma_e * params.P_e0 / (params.n_e0 * params.m_e));
-        
-        // Find maximum velocities
-        const double u_i_max = u_i1.cwiseAbs().maxCoeff();
-        const double u_e_max = u_e1.cwiseAbs().maxCoeff();
-        
-        // Maximum wave speeds (velocity + sound speed)
-        const double v_max_i = u_i_max + c_s_i;
-        const double v_max_e = u_e_max + c_s_e;
-        const double v_max = std::max(v_max_i, v_max_e);
-        
-        // CFL condition
-        const double dt_cfl = cfl_factor * dx / v_max;
-        return dt_cfl;
-    }
-    
-    /**
-     * @brief Compute spatial derivative using upwind scheme
-     * Upwind: uses backward difference if u > 0, forward if u < 0
-     */
-    double derivative_x_upwind(const Eigen::VectorXd& f, int i, double u) const {
-        if (u > 0.0) {
-            // Backward difference (upwind for positive velocity)
-            if (i == 0) {
-                return (f(i) - f(Nx-1)) / dx;  // Periodic boundary
-            } else {
-                return (f(i) - f(i-1)) / dx;
-            }
-        } else {
-            // Forward difference (upwind for negative velocity)
-            if (i == Nx - 1) {
-                return (f(0) - f(i)) / dx;  // Periodic boundary
-            } else {
-                return (f(i+1) - f(i)) / dx;
-            }
-        }
-    }
-    
-    /**
-     * @brief Compute spatial derivative using centered finite differences
-     * Used for pressure gradient terms (non-advective)
-     */
-    double derivative_x_centered(const Eigen::VectorXd& f, int i) const {
-        if (i == 0) {
-            return (f(1) - f(Nx-1)) / (2.0 * dx);  // Periodic boundary
-        } else if (i == Nx - 1) {
-            return (f(0) - f(Nx-2)) / (2.0 * dx);  // Periodic boundary
-        } else {
-            return (f(i+1) - f(i-1)) / (2.0 * dx);
-        }
-    }
-    
-    /**
-     * @brief Compute pressure gradient term for species s
-     * dP/dx term from equation 2
-     */
-    double pressure_gradient(const Eigen::VectorXd& n_s1, int i, 
-                            double n_s0, double P_s0, double gamma_s) const {
-        const double dn_dx = derivative_x_centered(n_s1, i);
-        const double n_s = n_s0 + n_s1(i);
-        
-        const double term1 = gamma_s / n_s0 * dn_dx * (1.0 + gamma_s * n_s1(i) / n_s0);
-        const double term2 = 2.0 * gamma_s / (n_s0 * n_s0) * n_s1(i) * dn_dx;
-        
-        return (P_s0 / n_s0) * (term1 - term2);
-    }
-    
-    /**
-     * @brief Compute time derivatives for all state variables
-     * E field must be computed before calling this
-     */
-    void compute_derivatives(Eigen::VectorXd& dn_i1_dt, Eigen::VectorXd& du_i1_dt,
-                            Eigen::VectorXd& dn_e1_dt, Eigen::VectorXd& du_e1_dt) {
-        
-        // For each spatial point, compute time derivatives
-        for (int i = 0; i < Nx; ++i) {
-            // Ion continuity equation (equation 1 for ions) - schéma upwind
-            const double du_i1_dx = derivative_x_upwind(u_i1, i, params.n_i0 + n_i1(i));
-            const double dn_i1_dx = derivative_x_upwind(n_i1, i, u_i1(i));
-            dn_i1_dt(i) = -(params.n_i0 + n_i1(i)) * du_i1_dx - u_i1(i) * dn_i1_dx;
-            
-            // Ion momentum equation (equation 2 for ions)
-            const double du_i1_dx_u = derivative_x_upwind(u_i1, i, u_i1(i));
-            const double dP_i_dx = pressure_gradient(n_i1, i, params.n_i0, params.P_i0, params.gamma_i);
-            du_i1_dt(i) = -u_i1(i) * du_i1_dx_u - dP_i_dx / params.m_i 
-                         + params.q_i * E(i) / params.m_i;
-            
-            // Electron continuity equation (equation 1 for electrons) - schéma upwind
-            const double du_e1_dx = derivative_x_upwind(u_e1, i, params.n_e0 + n_e1(i));
-            const double dn_e1_dx = derivative_x_upwind(n_e1, i, u_e1(i));
-            dn_e1_dt(i) = -(params.n_e0 + n_e1(i)) * du_e1_dx - u_e1(i) * dn_e1_dx;
-            
-            // Electron momentum equation (equation 2 for electrons)
-            const double du_e1_dx_u = derivative_x_upwind(u_e1, i, u_e1(i));
-            const double dP_e_dx = pressure_gradient(n_e1, i, params.n_e0, params.P_e0, params.gamma_e);
-            du_e1_dt(i) = -u_e1(i) * du_e1_dx_u - dP_e_dx / params.m_e 
-                         + params.q_e * E(i) / params.m_e;
-        }
-    }
-    
-    /**
-     * @brief Advance system by one time step using explicit Euler method
-     */
-    void step_euler() {
-        // Update dt based on current state (CFL condition)
-        dt = compute_cfl_timestep();
-        
-        // Now compute time derivatives using current E field
-        compute_derivatives(dn_i1_dt, du_i1_dt, dn_e1_dt, du_e1_dt);
-        
-        // Update state variables
-        n_i1.noalias() += dt * dn_i1_dt;
-        u_i1.noalias() += dt * du_i1_dt;
-        n_e1.noalias() += dt * dn_e1_dt;
-        u_e1.noalias() += dt * du_e1_dt;
+        Phi.resize(Nx+1); Phi_star.resize(Nx+1);
+        E_star.resize(Nx+1);
 
-        // Update E field using Poisson's equation (equation 3)
-        for (int i = 0; i < Nx; ++i) {
-            const double charge_density = params.q_i * n_i1(i) + params.q_e * n_e1(i);
-            dE_dx(i) = charge_density / params.epsilon_0;
-        }
-        
-        // Integrate dE/dx to get E using periodic boundary condition
-        E(0) = E(Nx-1);  // Periodic boundary condition
-        for (int i = 1; i < Nx; ++i) {
-            E(i) = E(i-1) + dE_dx(i-1) * dx;
-        }
+        n_iR.resize(Nx+1); n_iL.resize(Nx+1);
+        u_iR.resize(Nx+1); u_iL.resize(Nx+1);
+        n_eR.resize(Nx+1); n_eL.resize(Nx+1);
+        u_eR.resize(Nx+1); u_eL.resize(Nx+1);
+        n_e_star.resize(Nx+1); n_i_star.resize(Nx+1);
+        u_e_star.resize(Nx+1); u_i_star.resize(Nx+1);
+
+        F_e_n.resize(Nx+1); F_i_n.resize(Nx+1);
+        F_i_u.resize(Nx+1); F_e_u.resize(Nx+1);
+
+        minmod_i_n.resize(Nx+1); minmod_e_n.resize(Nx+1);
+        minmod_i_u.resize(Nx+1); minmod_e_u.resize(Nx+1);
+
+        // Initialize dt with CFL condition
+        compute_time_step();
     }
     
+    void compute_time_step() {
+        double max_speed = 0.0;
+        for (int i = 0; i < Nx+1; ++i) {
+            double speed_i = std::abs(u_i1(i)) + params.cs_i;
+            double speed_e = std::abs(u_e1(i)) + params.cs_e;
+            max_speed = std::max({max_speed, speed_i, speed_e});
+        }
+        dt = cfl_factor * dx / max_speed;
+    }
+
+    void calc_potential(Eigen::VectorXd& n_i, Eigen::VectorXd& n_e, Eigen::VectorXd& Phi_out);
+
+    void calc_electric_field(Eigen::VectorXd& Phi_in, Eigen::VectorXd& E_out);
+    
+    void minmod(Eigen::VectorXd& n_i, Eigen::VectorXd& n_e, 
+                Eigen::VectorXd& u_i, Eigen::VectorXd& u_e);
+
+    void MUSCL_reconstruction(int i, Eigen::VectorXd& n_i, Eigen::VectorXd& n_e,
+                             Eigen::VectorXd& u_i, Eigen::VectorXd& u_e);
+        
+    void calc_fluxes(int i, Eigen::VectorXd& n_i, Eigen::VectorXd& n_e,
+                     Eigen::VectorXd& u_i, Eigen::VectorXd& u_e);
+
+    void update_star_densities(int i);
+
+    double calc_pressure_gradient_i(int i, Eigen::VectorXd& n_i);
+    
+    double calc_pressure_gradient_e(int i, Eigen::VectorXd& n_e);
+
+    void update_star_velocities(int i, double grad_P_i, double grad_P_e);
+
+    void step_euler();
+
 public:
     /**
      * @brief Initialize time evolution output files
@@ -217,7 +141,7 @@ public:
             std::cerr << "Erreur: Impossible d'ouvrir " << prefix << "x_grid.txt" << std::endl;
             return;
         }
-        for (int i = 0; i < Nx; ++i) {
+        for (int i = 0; i < Nx+1; ++i) {
             file_x << x_grid[i] << "\n";
         }
         file_x.close();
@@ -242,19 +166,19 @@ public:
     /**
      * @brief Append current state to time evolution files
      */
-    void append_time_data(double t) {
+    void append_time_data(double& t) {
         // Écrire le temps
         file_t << t << "\n";
         
         // Écrire les données spatiales
-        for (int i = 0; i < Nx; ++i) {
+        for (int i = 0; i < Nx+1; ++i) {
             file_n_i1 << n_i1(i);
             file_u_i1 << u_i1(i);
             file_n_e1 << n_e1(i);
             file_u_e1 << u_e1(i);
             file_E << E(i);
             
-            if (i < Nx - 1) {
+            if (i < Nx) {
                 file_n_i1 << " ";
                 file_u_i1 << " ";
                 file_n_e1 << " ";
@@ -299,8 +223,8 @@ public:
     void run_time_evolution(double tf, const std::string& prefix = "../data/") {
         double t = 0.0;
         int step = 0;
-        std::vector<double> x_grid(Nx);
-        for (int i = 0; i < Nx; ++i) {
+        std::vector<double> x_grid(Nx+1);
+        for (int i = 0; i < Nx+1; ++i) {
             x_grid[i] = i * dx;
         }
         
