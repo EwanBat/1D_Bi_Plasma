@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>  // Pour std::setprecision
+#include <chrono>   // Pour mesurer le temps
 
 /**
  * @brief Class representing the state of a 1D fluid plasma system
@@ -47,11 +48,12 @@ private:
     Eigen::VectorXd Phi, Phi_star;        // Electric potential [V]
     Eigen::VectorXd E_star;        // Electric field at star step [V/m]
 
-    // Temporary vectors for calculations
-    Eigen::VectorXd n_iR, n_iL; // Right and left states for ions density
-    Eigen::VectorXd u_iR, u_iL; // Right and left states for ions velocity
-    Eigen::VectorXd n_eR, n_eL; // Right and left states for electrons density
-    Eigen::VectorXd u_eR, u_eL; // Right and left states for electrons velocity
+    // Temporary doubles for MUSCL reconstruction (replacing vectors)
+    double n_iR, n_iL; // Right and left states for ions density
+    double u_iR, u_iL; // Right and left states for ions velocity
+    double n_eR, n_eL; // Right and left states for electrons density
+    double u_eR, u_eL; // Right and left states for electrons velocity
+    
     Eigen::VectorXd n_e_star, n_i_star; // Star states for ions and electrons density
     Eigen::VectorXd u_e_star, u_i_star; // Star states for ions and electrons velocity
 
@@ -80,10 +82,6 @@ public:
         Phi.resize(Nx+1); Phi_star.resize(Nx+1);
         E_star.resize(Nx+1);
 
-        n_iR.resize(Nx+1); n_iL.resize(Nx+1);
-        u_iR.resize(Nx+1); u_iL.resize(Nx+1);
-        n_eR.resize(Nx+1); n_eL.resize(Nx+1);
-        u_eR.resize(Nx+1); u_eL.resize(Nx+1);
         n_e_star.resize(Nx+1); n_i_star.resize(Nx+1);
         u_e_star.resize(Nx+1); u_i_star.resize(Nx+1);
 
@@ -96,7 +94,8 @@ public:
         // Initialize dt with CFL condition
         compute_time_step();
     }
-    
+
+private:
     void compute_time_step() {
         double max_speed = 0.0;
         for (int i = 0; i < Nx+1; ++i) {
@@ -233,6 +232,9 @@ public:
         
         std::cout << "Starting simulation..." << std::endl;
         
+        // Démarrer le chronomètre
+        auto start_time = std::chrono::high_resolution_clock::now();
+        
         while (t < tf) {
             step_euler();
             if (t == 0.0){
@@ -247,9 +249,14 @@ public:
                       << std::flush;
         }
         
+        // Arrêter le chronomètre
+        auto end_time = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+        
         close_time_files();
         
         std::cout << std::endl << "Datas saved in data/ | " << step << " steps" << std::endl;
+        std::cout << "Time of the simulation: " << duration.count() / 1000.0 << " s" << std::endl;
         std::cout << "=============================" << std::endl;
     }
     

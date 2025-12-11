@@ -36,18 +36,18 @@ Where:
 
 ### Numerical Methods
 
-Le solveur implémente un **schéma volumes finis 1D d'ordre 2** pour la dynamique non linéaire du plasma électrostatique :
+The solver implements a **2nd-order 1D finite volume scheme** for nonlinear electrostatic plasma dynamics:
 
-- **Discrétisation spatiale** : Forme conservative avec reconstruction MUSCL (limiteur minmod) pour une précision d'ordre 2 tout en évitant les oscillations non physiques
-- **Flux numériques** : Schéma de Rusanov (Local Lax–Friedrichs) aux interfaces, garantissant robustesse et stabilité
-- **Intégration temporelle** : Schéma predictor–corrector de type MacCormack (ordre 2), avec passe prédictive (advection + sources) et passe corrective (reconstruction rétrograde + moyenne temporelle)
-- **Équation de Poisson** : Solveur linéaire tridiagonal sur différences finies centrées, résolu à chaque sous-étape pour une évolution auto-cohérente du champ électrique
-- **Conditions limites** : Périodiques
-- **Condition CFL** : 
+- **Spatial discretization**: Conservative form with MUSCL reconstruction (minmod limiter) for 2nd-order accuracy while avoiding non-physical oscillations
+- **Numerical fluxes**: Rusanov scheme (Local Lax–Friedrichs) at interfaces, ensuring robustness and stability
+- **Time integration**: MacCormack-type predictor–corrector scheme (2nd-order), with predictor step (advection + sources) and corrector step (backward reconstruction + time averaging)
+- **Poisson's equation**: Tridiagonal linear solver on centered finite differences, solved at each substep for self-consistent electric field evolution
+- **Boundary conditions**: Periodic
+- **CFL condition**: 
 
 $$ \Delta t \leq \text{cfl} \times \frac{\Delta x}{C_s} $$ 
 
-où $C_s$ est la vitesse du son caractéristique du plasma.
+where $C_s$ is the characteristic plasma sound speed.
 
 ## Dependencies
 
