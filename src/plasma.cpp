@@ -1,15 +1,5 @@
 #include "../include/plasma.hpp"
 
-/**
- * @brief Compute electric potential from charge density using Poisson equation
- * 
- * Solves d²Phi/dx² = -rho/epsilon_0 with Neumann boundary conditions (dPhi/dx = 0).
- * Uses finite difference discretization with second-order accuracy.
- * 
- * @param n_i Ion density perturbation [m^-3]
- * @param n_e Electron density perturbation [m^-3]
- * @param Phi_out Output electric potential [V]
- */
 void PlasmaSystem::calc_potential(Eigen::VectorXd& n_i, Eigen::VectorXd& n_e, Eigen::VectorXd& Phi_out) {
     Eigen::MatrixXd A = Eigen::MatrixXd::Zero(Nx + 1, Nx + 1);
     Eigen::VectorXd rho = (params.q_i * n_i + params.q_e * n_e) / params.epsilon_0;
@@ -37,15 +27,6 @@ void PlasmaSystem::calc_potential(Eigen::VectorXd& n_i, Eigen::VectorXd& n_e, Ei
     Phi_out = A.colPivHouseholderQr().solve(b);
 }
 
-/**
- * @brief Compute electric field from potential gradient
- * 
- * Uses centered finite difference: E = -dPhi/dx
- * Applies mirror boundary conditions at domain edges.
- * 
- * @param Phi_in Electric potential [V]
- * @param E_out Output electric field [V/m]
- */
 void PlasmaSystem::calc_electric_field(Eigen::VectorXd& Phi_in, Eigen::VectorXd& E_out) {
     // Interior points: centered difference
     for (int i = 1; i < Nx; ++i) {
@@ -56,17 +37,6 @@ void PlasmaSystem::calc_electric_field(Eigen::VectorXd& Phi_in, Eigen::VectorXd&
     E_out(Nx) = E_out(Nx-1);
 }
 
-/**
- * @brief Compute minmod slope limiter for MUSCL reconstruction
- * 
- * Calculates limited slopes for density and velocity of both species.
- * Prevents spurious oscillations in the numerical solution.
- * 
- * @param n_i Ion density perturbation [m^-3]
- * @param n_e Electron density perturbation [m^-3]
- * @param u_i Ion velocity [m/s]
- * @param u_e Electron velocity [m/s]
- */
 void PlasmaSystem::minmod(Eigen::VectorXd& n_i, Eigen::VectorXd& n_e, 
                           Eigen::VectorXd& u_i, Eigen::VectorXd& u_e) {
     const double inv_dx = 1.0 / dx;  // Compute once for efficiency
@@ -95,18 +65,6 @@ void PlasmaSystem::minmod(Eigen::VectorXd& n_i, Eigen::VectorXd& n_e,
     }
 }
 
-/**
- * @brief MUSCL reconstruction for high-order flux computation
- * 
- * Reconstructs left and right states at cell interface using limited slopes.
- * Provides second-order spatial accuracy while maintaining TVD property.
- * 
- * @param i Cell interface index
- * @param n_i Ion density perturbation [m^-3]
- * @param n_e Electron density perturbation [m^-3]
- * @param u_i Ion velocity [m/s]
- * @param u_e Electron velocity [m/s]
- */
 void PlasmaSystem::MUSCL_reconstruction(int i, Eigen::VectorXd& n_i, Eigen::VectorXd& n_e,
                                         Eigen::VectorXd& u_i, Eigen::VectorXd& u_e) {
     // Ion density: left and right states at interface
@@ -126,18 +84,6 @@ void PlasmaSystem::MUSCL_reconstruction(int i, Eigen::VectorXd& n_i, Eigen::Vect
     u_eR = u_e(i+1) - 0.5 * minmod_e_u(i+1) * dx;
 }
 
-/**
- * @brief Compute numerical fluxes using Rusanov (local Lax-Friedrichs) scheme
- * 
- * Calculates fluxes for density and velocity equations at cell interface.
- * Uses maximum wave speed for numerical dissipation.
- * 
- * @param i Cell interface index
- * @param n_i Ion density perturbation [m^-3]
- * @param n_e Electron density perturbation [m^-3]
- * @param u_i Ion velocity [m/s]
- * @param u_e Electron velocity [m/s]
- */
 void PlasmaSystem::calc_fluxes(int i, Eigen::VectorXd& n_i, Eigen::VectorXd& n_e,
                                         Eigen::VectorXd& u_i, Eigen::VectorXd& u_e) { 
     // Maximum wave speeds: |u| + c_s (sound speed)
@@ -165,16 +111,6 @@ void PlasmaSystem::calc_fluxes(int i, Eigen::VectorXd& n_i, Eigen::VectorXd& n_e
     F_e_u(i) = 0.5 * (F_eL_u + F_eR_u) - 0.5 * alpha_e * (u_eR - u_eL);
 }
 
-/**
- * @brief Compute ion pressure gradient term
- * 
- * Evaluates dP/dx for adiabatic equation of state: P = P_0 * (n/n_0)^gamma
- * Uses centered finite difference for spatial derivative.
- * 
- * @param i Spatial grid index
- * @param n_i Ion density perturbation [m^-3]
- * @return Pressure gradient term [Pa/m]
- */
 double PlasmaSystem::calc_pressure_gradient_i(int i, Eigen::VectorXd& n_i) {
     const double dn_i1_dx = (n_i(i + 1) - n_i(i - 1)) / (2.0 * dx);
     const double n_ratio = n_i(i) / params.n_i0;
@@ -184,16 +120,6 @@ double PlasmaSystem::calc_pressure_gradient_i(int i, Eigen::VectorXd& n_i) {
     return factor * dn_i1_dx * (1.0 - params.gamma_i * n_ratio);
 }
 
-/**
- * @brief Compute electron pressure gradient term
- * 
- * Evaluates dP/dx for adiabatic equation of state: P = P_0 * (n/n_0)^gamma
- * Uses centered finite difference for spatial derivative.
- * 
- * @param i Spatial grid index
- * @param n_e Electron density perturbation [m^-3]
- * @return Pressure gradient term [Pa/m]
- */
 double PlasmaSystem::calc_pressure_gradient_e(int i, Eigen::VectorXd& n_e) {
     const double dn_e1_dx = (n_e(i + 1) - n_e(i - 1)) / (2.0 * dx);
     const double n_ratio = n_e(i) / params.n_e0;
@@ -203,13 +129,6 @@ double PlasmaSystem::calc_pressure_gradient_e(int i, Eigen::VectorXd& n_e) {
     return factor * dn_e1_dx * (1.0 - params.gamma_e * n_ratio);
 }
 
-/**
- * @brief Perform one time step using Heun's method (2nd-order Runge-Kutta)
- * 
- * Two-stage predictor-corrector scheme:
- * 1. Predictor: Forward Euler to intermediate "star" state
- * 2. Corrector: Average of initial and predicted derivatives
- */
 void PlasmaSystem::step_euler() {
     // Precompute constants used in loops for efficiency
     const double dt_dx = dt / dx;
