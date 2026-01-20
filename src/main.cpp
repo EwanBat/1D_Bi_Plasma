@@ -21,7 +21,8 @@ int main() {
     
     // Time domain
     double t0 = 0.0;              // Start time [s]
-    double tf = 1e-8;             // End time [s]
+    double tf = 5e-8;             // End time [s]
+    double dt_data = 1e-10;        // Data saving interval [s]
     
     std::cout << "=== Simulation Parameters ===" << std::endl;
     std::cout << "Spatial domain: [" << x0 << ", " << xf << "] m" << std::endl;
@@ -81,7 +82,7 @@ int main() {
     system.set_constant_electric_field(E0);
     
     // === TIME EVOLUTION ===
-    system.run_time_evolution(tf, "../data/");
+    system.run_time_evolution(tf, dt_data, "../data/");
 
     std::cout << "\n=== Time evolution complete ===" << std::endl;
     

@@ -318,9 +318,10 @@ public:
      * @param tf Final simulation time [s]
      * @param prefix Directory path prefix for output files
      */
-    void run_time_evolution(double tf, const std::string& prefix = "../data/") {
-        double t = 0.0;
+    void run_time_evolution(double tf, double dt_data, const std::string& prefix = "../data/") {
+        double t = 0.0, t_data = 0.0;
         int step = 0;
+        
         std::vector<double> x_grid(m_Nx+1);
         for (int i = 0; i < m_Nx+1; ++i) {
             x_grid[i] = i * m_dx;
@@ -341,8 +342,12 @@ public:
                 std::cout << "Initial dt: " << m_dt << " s" << std::endl;
             }
             t += m_dt;
+            t_data += m_dt;
             step++;
-            append_time_data(t);
+            if (t_data >= dt_data) {
+                t_data = 0.0;
+                append_time_data(t);
+            }
             
             // Display progress bar
             std::cout << "\rProgress: " << std::fixed << std::setprecision(2) 

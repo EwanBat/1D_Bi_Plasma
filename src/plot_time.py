@@ -100,11 +100,11 @@ def plot_time_evolution():
     # 6. Spatio-temporal diagram of n_i1
     ax = axes[2, 1]
     extent = [x_grid[0], x_grid[-1], time[0]*1e6, time[-1]*1e6]
-    im = ax.imshow(n_i1_time, aspect='auto', origin='lower', extent=extent, cmap='RdBu_r')
+    im = ax.imshow(n_e1_time, aspect='auto', origin='lower', extent=extent, cmap='RdBu_r')
     ax.set_xlabel("Position x [m]")
     ax.set_ylabel("Time [ns]")
     ax.set_title(r"Spatio-temporal diagram $n_{i1}$")
-    plt.colorbar(im, ax=ax, label=r"$n_{i1}$ [m$^{-3}$]")
+    plt.colorbar(im, ax=ax, label=r"$n_{e1}$ [m$^{-3}$]")
 
     plt.tight_layout()
     plt.savefig("../image/time_evolution.png", dpi=150)
