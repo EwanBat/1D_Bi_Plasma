@@ -100,7 +100,7 @@ ax = axes[2, 1]
 extent = [x_grid[0], x_grid[-1], time[0]*1e6, time[-1]*1e6]
 im = ax.imshow(n_i1_time, aspect='auto', origin='lower', extent=extent, cmap='RdBu_r')
 ax.set_xlabel("Position x [m]")
-ax.set_ylabel("Time [μs]")
+ax.set_ylabel("Time [ns]")
 ax.set_title(r"Spatio-temporal diagram $n_{i1}$")
 plt.colorbar(im, ax=ax, label=r"$n_{i1}$ [m$^3$]")
 
@@ -137,7 +137,7 @@ time_text = fig_anim.suptitle('', fontsize=12)
 def animate(frame):
     for line, data in zip(lines, data_arrays):
         line.set_ydata(data[frame, :])
-    fig_anim.suptitle(f"Animation de l'évolution temporelle - Temps: {time[frame]*1e6:.3f} μs", fontsize=14)
+    fig_anim.suptitle(f"Animation de l'évolution temporelle - Temps: {time[frame]*1e9:.3f} ns", fontsize=14)
     return lines
 
 anim = FuncAnimation(fig_anim, animate, frames=Nt, interval=50, blit=True, repeat=True)

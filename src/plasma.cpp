@@ -40,8 +40,8 @@ void PlasmaSystem::calc_electric_field(Eigen::VectorXd& Phi_in, Eigen::VectorXd&
 void PlasmaSystem::apply_boundary_conditions(Eigen::VectorXd& n_e, Eigen::VectorXd& n_i,
                                         Eigen::VectorXd& u_e, Eigen::VectorXd& u_i) {
     // Mirror boundary conditions at both ends
-    n_i(0) = 0;         n_i(m_Nx) = 0;
-    n_e(0) = 0;         n_e(m_Nx) = 0;
+    n_i(0) = n_i(1);         n_i(m_Nx) = n_i(m_Nx-1);
+    n_e(0) = n_e(1);         n_e(m_Nx) = n_e(m_Nx-1);
     u_i(0) = 0;         u_i(m_Nx) = 0;
     u_e(0) = 0;         u_e(m_Nx) = 0;
 }
@@ -170,10 +170,7 @@ void PlasmaSystem::step_euler() {
     }
     
     // Apply mirror boundary conditions to star state
-    m_n_i_star(0) = m_n_i_star(1); m_n_i_star(m_Nx) = m_n_i_star(m_Nx - 1);
-    m_n_e_star(0) = m_n_e_star(1); m_n_e_star(m_Nx) = m_n_e_star(m_Nx - 1);
-    m_u_i_star(0) = m_u_i_star(1); m_u_i_star(m_Nx) = m_u_i_star(m_Nx - 1);
-    m_u_e_star(0) = m_u_e_star(1); m_u_e_star(m_Nx) = m_u_e_star(m_Nx - 1);
+    apply_boundary_conditions( m_n_e_star, m_n_i_star, m_u_e_star, m_u_i_star);
 
     // === STAGE 2: Corrector (Heun's averaging) ===
     calc_potential(m_n_i_star, m_n_e_star, m_Phi_star);
@@ -207,10 +204,7 @@ void PlasmaSystem::step_euler() {
     }
     
     // Apply mirror boundary conditions to final state
-    m_n_i1(0) = m_n_i1(1); m_n_i1(m_Nx) = m_n_i1(m_Nx - 1);
-    m_n_e1(0) = m_n_e1(1); m_n_e1(m_Nx) = m_n_e1(m_Nx - 1);
-    m_u_i1(0) = m_u_i1(1); m_u_i1(m_Nx) = m_u_i1(m_Nx - 1);
-    m_u_e1(0) = m_u_e1(1); m_u_e1(m_Nx) = m_u_e1(m_Nx - 1);
+    apply_boundary_conditions( m_n_e1, m_n_i1, m_u_e1, m_u_i1);
 
     // Update electric field for next time step
     calc_potential(m_n_i1, m_n_e1, m_Phi);

@@ -10,7 +10,7 @@ int main() {
     // Spatial domain
     double x0 = 0.0;              // Start position [m]
     double xf = 1e-2;              // End position [m]
-    int Nx = 100;                 // Number of spatial points
+    int Nx = 150;                 // Number of spatial points
     double dx = (xf - x0) / (Nx + 1);
     
     // Spatial grid
@@ -75,7 +75,7 @@ int main() {
     double amp_E0 = 1e3; // Amplitude of electric potential perturbation [V]
     Eigen::VectorXd E0(Nx+1);
     for (int i = 0; i < Nx; ++i) {
-        E0(i) = amp_E0 * std::sin(2.0 * M_PI * x_grid[i] / (xf - x0));
+        E0(i) = amp_E0;
     }    
     E0(Nx) = E0(Nx - 1); // Mirror boundary condition
     system.set_constant_electric_field(E0);

@@ -328,6 +328,7 @@ public:
         
         std::cout << "\n=== Initializing output files ===" << std::endl;
         init_time_files(x_grid, prefix);
+        append_time_data(t);  // Save initial state
         
         std::cout << "Starting simulation..." << std::endl;
         
