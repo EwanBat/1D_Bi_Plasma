@@ -10,7 +10,7 @@ int main() {
     // Spatial domain
     double x0 = 0.0;              // Start position [m]
     double xf = 1e-2;              // End position [m]
-    int Nx = 150;                 // Number of spatial points
+    int Nx = 200;                 // Number of spatial points
     double dx = (xf - x0) / (Nx + 1);
     
     // Spatial grid
@@ -43,7 +43,7 @@ int main() {
     
     // Temperature and pressure (assuming T ~ 1 eV ≈ 11600 K)
     params.T_i = 500.0;                                           // Ion temperature [K]
-    params.T_e = 2000.0;                                           // Electron temperature [K]
+    params.T_e = 15000.0;                                           // Electron temperature [K]
     params.P_i0 = params.n_i0 * consts::k_B * params.T_i;          // Ion pressure [Pa]
     params.P_e0 = params.n_e0 * consts::k_B * params.T_e;          // Electron pressure [Pa]
     
