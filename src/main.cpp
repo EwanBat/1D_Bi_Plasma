@@ -5,13 +5,19 @@
 #include "../include/constants.hpp"
 
 int main() {
-    // === SIMULATION PARAMETERS ===
+    // ================================ SIMULATION PARAMETERS ========================
     
     // Spatial domain
     double x0 = 0.0;              // Start position [m]
-    double xf = 1e0;              // End position [m]
-    int Nx = 200;                 // Number of spatial points
+    double xf = 1e-2;              // End position [m]
+    int Nx = 100;                 // Number of spatial points
     double dx = (xf - x0) / (Nx + 1);
+    
+    // Spatial grid
+    std::vector<double> x_grid(Nx);
+    for (int i = 0; i < Nx; ++i) {
+        x_grid[i] = x0 + i * dx;
+    }
     
     // Time domain
     double t0 = 0.0;              // Start time [s]
@@ -24,7 +30,7 @@ int main() {
     std::cout << "Time domain: [" << t0 << ", " << tf << "] s" << std::endl;
     std::cout << "=============================" << std::endl;
     
-    // === PHYSICAL PARAMETERS ===
+    // ============================== PHYSICAL PARAMETERS ======================
     PlasmaParams params;
     
     // Species properties: ions (protons) and electrons
@@ -36,8 +42,8 @@ int main() {
     params.n_e0 = 1.0e15;                                           // Electron background density [m^-3]
     
     // Temperature and pressure (assuming T ~ 1 eV ≈ 11600 K)
-    params.T_i = 10000.0;                                           // Ion temperature [K]
-    params.T_e = 10000.0;                                           // Electron temperature [K]
+    params.T_i = 500.0;                                           // Ion temperature [K]
+    params.T_e = 2000.0;                                           // Electron temperature [K]
     params.P_i0 = params.n_i0 * consts::k_B * params.T_i;          // Ion pressure [Pa]
     params.P_e0 = params.n_e0 * consts::k_B * params.T_e;          // Electron pressure [Pa]
     
@@ -62,36 +68,24 @@ int main() {
     std::cout << "Electron plasma frequency: " << plasma_frequency << " rad/s" << std::endl;
     std::cout << "============================" << std::endl;
     
-    // === SPATIAL GRID INITIALIZATION ===
-    std::vector<double> x_grid(Nx);
-    for (int i = 0; i < Nx; ++i) {
-        x_grid[i] = x0 + i * dx;
-    }
-    
-    // === PLASMA SYSTEM INITIALIZATION ===
+    // ============================== PLASMA SYSTEM INITIALIZATION ======================
     PlasmaSystem system(Nx, dx, params);
     
     // === INITIAL PERTURBATION ===
-    // Set Gaussian perturbation in electric field
-    const double gauss_center = 0.5 * (x0 + xf);      // Center of domain [m]
-    const double gauss_width = 1e-2;                  // Gaussian width (σ) [m]
-    const double gauss_amplitude = 1.0e-3;            // Density perturbation amplitude (0.1%)
-    const double E_amplitude = 1e3;                   // Electric field amplitude [V/m]
-    
-    system.set_gaussian_perturbation(x_grid, gauss_center, gauss_width, gauss_amplitude, E_amplitude);
-    
-    std::cout << "\n=== Initial Perturbation ===" << std::endl;
-    std::cout << "Gaussian center: " << gauss_center << " m" << std::endl;
-    std::cout << "Gaussian width: " << gauss_width << " m" << std::endl;
-    std::cout << "Relative amplitude: " << gauss_amplitude * 100 << "%" << std::endl;
-    std::cout << "=============================" << std::endl;
+    double amp_E0 = 1e3; // Amplitude of electric potential perturbation [V]
+    Eigen::VectorXd E0(Nx+1);
+    for (int i = 0; i < Nx; ++i) {
+        E0(i) = amp_E0 * std::sin(2.0 * M_PI * x_grid[i] / (xf - x0));
+    }    
+    E0(Nx) = E0(Nx - 1); // Mirror boundary condition
+    system.set_constant_electric_field(E0);
     
     // === TIME EVOLUTION ===
     system.run_time_evolution(tf, "../data/");
 
     std::cout << "\n=== Time evolution complete ===" << std::endl;
     
-    // Run plotting script
+    // === Run plotting script ===
     std::string cmd = "python3 ../src/plot_time.py";
     int result = std::system(cmd.c_str());
     if (result != 0) {
