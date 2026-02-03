@@ -45,28 +45,31 @@ public:
 private:
     // File handles for time-series output
     std::ofstream m_file_t, m_file_n_i1, m_file_u_i1, m_file_n_e1, m_file_u_e1, m_file_E;
-    
-    // Temporary storage vectors to avoid repeated allocations
-    Eigen::VectorXd m_Phi, m_Phi_star;        // Electric potential [V]
-    Eigen::VectorXd m_E_star;               // Electric field at predictor step [V/m]
 
-    // MUSCL reconstruction: left (L) and right (R) states at cell interfaces
-    double m_n_iR, m_n_iL;         // Ion density states
-    double m_u_iR, m_u_iL;         // Ion velocity states
-    double m_n_eR, m_n_eL;         // Electron density states
-    double m_u_eR, m_u_eL;         // Electron velocity states
-    
-    // Intermediate states for Heun's method
-    Eigen::VectorXd m_n_e_star, m_n_i_star;   // Density at predictor step
-    Eigen::VectorXd m_u_e_star, m_u_i_star;   // Velocity at predictor step
-
-    // Numerical fluxes at cell interfaces
-    Eigen::VectorXd m_F_e_n, m_F_i_n;         // Density fluxes [m^-2 s^-1]
-    Eigen::VectorXd m_F_i_u, m_F_e_u;         // Velocity fluxes [m^2 s^-2]
+    // MUSCL reconstruction: left (L) and right (R) states at all cell interfaces (vectorized)
+    Eigen::VectorXd m_n_iR_vec, m_n_iL_vec;   // Ion density states
+    Eigen::VectorXd m_u_iR_vec, m_u_iL_vec;   // Ion velocity states
+    Eigen::VectorXd m_n_eR_vec, m_n_eL_vec;   // Electron density states
+    Eigen::VectorXd m_u_eR_vec, m_u_eL_vec;   // Electron velocity states
 
     // Slope limiters for MUSCL reconstruction
     Eigen::VectorXd m_minmod_i_n, m_minmod_e_n;   // Density slopes [m^-4]
     Eigen::VectorXd m_minmod_i_u, m_minmod_e_u;   // Velocity slopes [s^-1]
+    
+    // Numerical fluxes at cell interfaces
+    Eigen::VectorXd m_F_e_n, m_F_i_n;         // Density fluxes [m^-2 s^-1]
+    Eigen::VectorXd m_F_i_u, m_F_e_u;         // Velocity fluxes [m^2 s^-2]
+
+    // Pressure gradients (vectorized)
+    Eigen::VectorXd m_grad_P_i, m_grad_P_e;   // Pressure gradients [Pa/m]
+
+    // Intermediate states for Heun's method
+    Eigen::VectorXd m_n_e_star, m_n_i_star;   // Density at predictor step
+    Eigen::VectorXd m_u_e_star, m_u_i_star;   // Velocity at predictor step
+
+    // Temporary storage vectors to avoid repeated allocations
+    Eigen::VectorXd m_Phi, m_Phi_star;        // Electric potential [V]
+    Eigen::VectorXd m_E_star;               // Electric field at predictor step [V/m] 
 
 public:
     /**
@@ -102,6 +105,16 @@ public:
 
         m_minmod_i_n.resize(m_Nx+1); m_minmod_e_n.resize(m_Nx+1);
         m_minmod_i_u.resize(m_Nx+1); m_minmod_e_u.resize(m_Nx+1);
+
+        // Initialize vectorized MUSCL states
+        m_n_iL_vec.resize(m_Nx); m_n_iR_vec.resize(m_Nx);
+        m_n_eL_vec.resize(m_Nx); m_n_eR_vec.resize(m_Nx);
+        m_u_iL_vec.resize(m_Nx); m_u_iR_vec.resize(m_Nx);
+        m_u_eL_vec.resize(m_Nx); m_u_eR_vec.resize(m_Nx);
+
+        // Initialize pressure gradient vectors
+        m_grad_P_i.resize(m_Nx+1); m_grad_P_i.setZero();
+        m_grad_P_e.resize(m_Nx+1); m_grad_P_e.setZero();
 
         // Compute initial time step based on CFL condition
         compute_time_step();
@@ -153,46 +166,35 @@ private:
                 Eigen::VectorXd& u_i, Eigen::VectorXd& u_e);
 
     /**
-     * @brief MUSCL reconstruction at cell interface
+     * @brief Vectorized MUSCL reconstruction at all cell interfaces
      * 
-     * @param i Cell interface index
+     * Computes left and right states at all interfaces simultaneously.
+     * 
      * @param n_i Ion density perturbation [m^-3]
      * @param n_e Electron density perturbation [m^-3]
      * @param u_i Ion velocity [m/s]
      * @param u_e Electron velocity [m/s]
      */
-    void MUSCL_reconstruction(int i, Eigen::VectorXd& n_i, Eigen::VectorXd& n_e,
-                             Eigen::VectorXd& u_i, Eigen::VectorXd& u_e);
+    void MUSCL_reconstruction_all(Eigen::VectorXd& n_i, Eigen::VectorXd& n_e,
+                                  Eigen::VectorXd& u_i, Eigen::VectorXd& u_e);
     
     /**
-     * @brief Compute numerical fluxes using Rusanov scheme
+     * @brief Vectorized computation of numerical fluxes using Rusanov scheme
      * 
-     * @param i Cell interface index
-     * @param n_i Ion density perturbation [m^-3]
-     * @param n_e Electron density perturbation [m^-3]
-     * @param u_i Ion velocity [m/s]
-     * @param u_e Electron velocity [m/s]
+     * Computes all fluxes at cell interfaces in one vectorized operation.
      */
-    void calc_fluxes(int i, Eigen::VectorXd& n_i, Eigen::VectorXd& n_e,
-                     Eigen::VectorXd& u_i, Eigen::VectorXd& u_e);
+    void calc_fluxes_all();
 
     /**
-     * @brief Compute ion pressure gradient
+     * @brief Vectorized computation of pressure gradients
      * 
-     * @param i Spatial grid index
+     * Computes all pressure gradients for ions and electrons simultaneously.
+     * Results stored in m_grad_P_i and m_grad_P_e.
+     * 
      * @param n_i Ion density perturbation [m^-3]
-     * @return Pressure gradient [Pa/m]
-     */
-    double calc_pressure_gradient_i(int i, Eigen::VectorXd& n_i);
-    
-    /**
-     * @brief Compute electron pressure gradient
-     * 
-     * @param i Spatial grid index
      * @param n_e Electron density perturbation [m^-3]
-     * @return Pressure gradient [Pa/m]
      */
-    double calc_pressure_gradient_e(int i, Eigen::VectorXd& n_e);
+    void calc_pressure_gradients(Eigen::VectorXd& n_i, Eigen::VectorXd& n_e);
     
     /**
      * @brief Apply mirror boundary conditions to all variables
@@ -316,6 +318,7 @@ public:
      * Outputs progress to console and saves data at every time step.
      * 
      * @param tf Final simulation time [s]
+     * @param dt_data Time interval between data points [s]
      * @param prefix Directory path prefix for output files
      */
     void run_time_evolution(double tf, double dt_data, const std::string& prefix = "../data/") {
