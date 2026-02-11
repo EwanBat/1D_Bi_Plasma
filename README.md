@@ -68,6 +68,7 @@ where $C_s$ is the characteristic plasma sound speed.
 │   └── Eigen/              # Eigen library headers
 ├── src/
 │   ├── main.cpp            # Main simulation program
+    ├── plasmas.cpp         # PlasmaSystem class implementation
 │   └── plot_time.py        # Python visualization script
 ├── build/                  # Build directory
 ├── data/                   # Output data files
