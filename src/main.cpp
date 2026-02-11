@@ -9,7 +9,7 @@ int main() {
     
     // Spatial domain
     double x0 = 0.0;              // Start position [m]
-    double xf = 5e-2;              // End position [m]
+    double xf = 1e-1;              // End position [m]
     int Nx = 150;                 // Number of spatial points
     double dx = (xf - x0) / (Nx + 1);
     

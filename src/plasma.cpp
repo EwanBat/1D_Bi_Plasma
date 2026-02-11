@@ -6,12 +6,6 @@ void PlasmaSystem::calc_potential(Eigen::VectorXd& n_i, Eigen::VectorXd& n_e, Ei
     Eigen::VectorXd rho = (m_params.q_i * n_i + m_params.q_e * n_e) / m_params.epsilon_0;
     Eigen::VectorXd b = - rho * m_dx * m_dx;
 
-    // Mirror BC at i=0: dPhi/dx = 0 => Phi_1 - Phi_0 = 0 (using ghost point)
-    // Equivalent to: Phi_{-1} = Phi_1, so (Phi_1 - 2*Phi_0 + Phi_{-1})/dx² = (2*Phi_1 - 2*Phi_0)/dx²
-    A(0, 0) = -2.0;
-    A(0, 1) = 2.0;
-    // b(0) already set as -rho*dx^2
-
     // Interior points: standard second-order finite difference stencil
     for (int i = 1; i <= m_Nx - 1; ++i) {
         A(i, i-1) = 1.0;
@@ -19,19 +13,9 @@ void PlasmaSystem::calc_potential(Eigen::VectorXd& n_i, Eigen::VectorXd& n_e, Ei
         A(i, i+1) = 1.0;
         // b(i) already set as -rho*dx^2
     }
-
-    // Mirror BC at i=Nx: dPhi/dx = 0 => Phi_{Nx} - Phi_{Nx-1} = 0 (using ghost point)
-    // Equivalent to: Phi_{Nx+1} = Phi_{Nx-1}, so (Phi_{Nx-1} - 2*Phi_Nx + Phi_{Nx+1})/dx² = (2*Phi_{Nx-1} - 2*Phi_Nx)/dx²
-    A(m_Nx, m_Nx - 1) = 2.0;
-    A(m_Nx, m_Nx) = -2.0;
-    // b(m_Nx) already set as -rho*dx^2
-
-    // Fix potential reference to avoid singular matrix (set mean to zero)
-    // Add constraint: sum of all Phi = 0
-    for (int i = 0; i <= m_Nx; ++i) {
-        A(0, i) += 1.0;
-    }
-    b(0) += 0.0;
+    // Mirror BC
+    A(0, 0) = -2.0; A(0, 1) = 1.0; A(0, m_Nx) = 1.0; // Left boundary
+    A(m_Nx, 0) = 1.0; A(m_Nx, m_Nx-1) = 1.0; A(m_Nx, m_Nx) = -2.0; // Right boundary
 
     // Solve linear system using QR decomposition
     Phi_out = A.colPivHouseholderQr().solve(b);
@@ -43,17 +27,75 @@ void PlasmaSystem::calc_electric_field(Eigen::VectorXd& Phi_in, Eigen::VectorXd&
         E_out(i) = -(Phi_in(i+1) - Phi_in(i-1)) / (2.0 * m_dx) + m_E0(i);
     }
     // Boundary conditions for E
-    E_out(0) = E_out(m_Nx-1);
-    E_out(m_Nx) = E_out(1);
+    E_out(0) = m_E0(0) - (Phi_in(1) - Phi_in(m_Nx)) / (2.0 * m_dx);
+    E_out(m_Nx) = m_E0(m_Nx) - (Phi_in(0) - Phi_in(m_Nx-1)) / (2.0 * m_dx);
 }
 
 void PlasmaSystem::apply_boundary_conditions(Eigen::VectorXd& n_e, Eigen::VectorXd& n_i,
                                         Eigen::VectorXd& u_e, Eigen::VectorXd& u_i) {
-    // Mirror boundary conditions at both ends
-    n_i(0) = n_i(m_Nx-1);         n_i(m_Nx) = n_i(1);
-    n_e(0) = n_e(m_Nx-1);         n_e(m_Nx) = n_e(1);
-    u_i(0) = u_i(m_Nx-1);         u_i(m_Nx) = u_e(1);
-    u_e(0) = u_e(m_Nx-1);         u_e(m_Nx) = u_i(1);
+    const double half_dx = 0.5 * m_dx;
+    const double inv_dx = 1.0 / m_dx;
+    
+    // Compute minmod slopes at boundaries using periodic neighbors
+    // For i = 0: use values at Nx-1, Nx, and 1
+    // For i = Nx: use values at Nx-1, 0, and 1
+    
+    // === Ion density at boundaries ===
+    double a_n_i_0 = (n_i(m_Nx) - n_i(m_Nx - 1)) * inv_dx;  // backward diff at 0 (using periodicity)
+    double b_n_i_0 = (n_i(0) - n_i(m_Nx)) * inv_dx;          // forward diff at 0
+    double minmod_n_i_0 = 0.5 * (std::copysign(1.0, a_n_i_0) + std::copysign(1.0, b_n_i_0)) 
+                        * std::min(std::abs(a_n_i_0), std::abs(b_n_i_0));
+    
+    double a_n_i_Nx = (n_i(0) - n_i(m_Nx)) * inv_dx;     // backward diff at Nx
+    double b_n_i_Nx = (n_i(1) - n_i(0)) * inv_dx;            // forward diff at Nx
+    double minmod_n_i_Nx = 0.5 * (std::copysign(1.0, a_n_i_Nx) + std::copysign(1.0, b_n_i_Nx)) 
+                         * std::min(std::abs(a_n_i_Nx), std::abs(b_n_i_Nx));
+    
+    // MUSCL reconstruction: average of left and right states
+    n_i(0) = 0.5 * ((n_i(m_Nx) + half_dx * minmod_n_i_0) + (n_i(1) - half_dx * m_minmod_i_n(1)));
+    n_i(m_Nx) = 0.5 * ((n_i(m_Nx - 1) + half_dx * m_minmod_i_n(m_Nx - 1)) + (n_i(1) - half_dx * minmod_n_i_Nx));
+    
+    // === Electron density at boundaries ===
+    double a_n_e_0 = (n_e(m_Nx) - n_e(m_Nx - 1)) * inv_dx;
+    double b_n_e_0 = (n_e(0) - n_e(m_Nx)) * inv_dx;
+    double minmod_n_e_0 = 0.5 * (std::copysign(1.0, a_n_e_0) + std::copysign(1.0, b_n_e_0)) 
+                        * std::min(std::abs(a_n_e_0), std::abs(b_n_e_0));
+    
+    double a_n_e_Nx = (n_e(0) - n_e(m_Nx)) * inv_dx;
+    double b_n_e_Nx = (n_e(1) - n_e(0)) * inv_dx;
+    double minmod_n_e_Nx = 0.5 * (std::copysign(1.0, a_n_e_Nx) + std::copysign(1.0, b_n_e_Nx)) 
+                         * std::min(std::abs(a_n_e_Nx), std::abs(b_n_e_Nx));
+    
+    n_e(0) = 0.5 * ((n_e(m_Nx) + half_dx * minmod_n_e_0) + (n_e(1) - half_dx * m_minmod_e_n(1)));
+    n_e(m_Nx) = 0.5 * ((n_e(m_Nx - 1) + half_dx * m_minmod_e_n(m_Nx - 1)) + (n_e(1) - half_dx * minmod_n_e_Nx));
+    
+    // === Ion velocity at boundaries ===
+    double a_u_i_0 = (u_i(m_Nx) - u_i(m_Nx - 1)) * inv_dx;
+    double b_u_i_0 = (u_i(1) - u_i(m_Nx)) * inv_dx;
+    double minmod_u_i_0 = 0.5 * (std::copysign(1.0, a_u_i_0) + std::copysign(1.0, b_u_i_0)) 
+                        * std::min(std::abs(a_u_i_0), std::abs(b_u_i_0));
+    
+    double a_u_i_Nx = (u_i(0) - u_i(m_Nx - 1)) * inv_dx;
+    double b_u_i_Nx = (u_i(1) - u_i(0)) * inv_dx;
+    double minmod_u_i_Nx = 0.5 * (std::copysign(1.0, a_u_i_Nx) + std::copysign(1.0, b_u_i_Nx)) 
+                         * std::min(std::abs(a_u_i_Nx), std::abs(b_u_i_Nx));
+    
+    u_i(0) = 0.5 * ((u_i(m_Nx) + half_dx * minmod_u_i_0) + (u_i(1) - half_dx * m_minmod_i_u(1)));
+    u_i(m_Nx) = 0.5 * ((u_i(m_Nx - 1) + half_dx * m_minmod_i_u(m_Nx - 1)) + (u_i(1) - half_dx * minmod_u_i_Nx));
+    
+    // === Electron velocity at boundaries ===
+    double a_u_e_0 = (u_e(m_Nx) - u_e(m_Nx - 1)) * inv_dx;
+    double b_u_e_0 = (u_e(1) - u_e(m_Nx)) * inv_dx;
+    double minmod_u_e_0 = 0.5 * (std::copysign(1.0, a_u_e_0) + std::copysign(1.0, b_u_e_0)) 
+                        * std::min(std::abs(a_u_e_0), std::abs(b_u_e_0));
+    
+    double a_u_e_Nx = (u_e(0) - u_e(m_Nx - 1)) * inv_dx;
+    double b_u_e_Nx = (u_e(1) - u_e(0)) * inv_dx;
+    double minmod_u_e_Nx = 0.5 * (std::copysign(1.0, a_u_e_Nx) + std::copysign(1.0, b_u_e_Nx)) 
+                         * std::min(std::abs(a_u_e_Nx), std::abs(b_u_e_Nx));
+    
+    u_e(0) = 0.5 * ((u_e(m_Nx) + half_dx * minmod_u_e_0) + (u_e(1) - half_dx * m_minmod_e_u(1)));
+    u_e(m_Nx) = 0.5 * ((u_e(m_Nx - 1) + half_dx * m_minmod_e_u(m_Nx - 1)) + (u_e(1) - half_dx * minmod_u_e_Nx));
 }
 
 void PlasmaSystem::minmod(Eigen::VectorXd& n_i, Eigen::VectorXd& n_e, 
@@ -134,15 +176,37 @@ void PlasmaSystem::calc_pressure_gradients(Eigen::VectorXd& n_i, Eigen::VectorXd
     
     // Vectorized density gradients for ions
     Eigen::ArrayXd dn_i_dx = (n_i.segment(2, N) - n_i.segment(0, N)).array() * inv_2dx;
-    Eigen::ArrayXd n_i_ratio = n_i.segment(1, N).array() / m_params.n_i0;
-    const double factor_i = (m_params.P_i0 * m_params.gamma_i) / (m_params.n_i0 * m_params.n_i0);
-    m_grad_P_i.segment(1, N) = factor_i * dn_i_dx * (1.0 - m_params.gamma_i * n_i_ratio);
+    Eigen::ArrayXd left_term_ion = m_params.gamma_i / m_params.n_i0 * dn_i_dx * (1 + m_params.gamma_i * n_i.segment(1, N).array() / m_params.n_i0);
+    Eigen::ArrayXd right_term_ion = - 2 * m_params.gamma_i * n_i.segment(1, N).array() * dn_i_dx / (m_params.n_i0 * m_params.n_i0);
+    m_grad_P_i.segment(1, N) = m_params.P_i0 / m_params.n_i0 * (left_term_ion + right_term_ion);
     
     // Vectorized density gradients for electrons
     Eigen::ArrayXd dn_e_dx = (n_e.segment(2, N) - n_e.segment(0, N)).array() * inv_2dx;
-    Eigen::ArrayXd n_e_ratio = n_e.segment(1, N).array() / m_params.n_e0;
-    const double factor_e = (m_params.P_e0 * m_params.gamma_e) / (m_params.n_e0 * m_params.n_e0);
-    m_grad_P_e.segment(1, N) = factor_e * dn_e_dx * (1.0 - m_params.gamma_e * n_e_ratio);
+    Eigen::ArrayXd left_term_electron = m_params.gamma_e / m_params.n_e0 * dn_e_dx * (1 + m_params.gamma_e * n_e.segment(1, N).array() / m_params.n_e0);
+    Eigen::ArrayXd right_term_electron = - 2 * m_params.gamma_e * n_e.segment(1, N).array() * dn_e_dx / (m_params.n_e0 * m_params.n_e0);
+    m_grad_P_e.segment(1, N) = m_params.P_e0 / m_params.n_e0 * (left_term_electron + right_term_electron);
+    
+    // === Boundary conditions at i = 0 (using periodic: n(Nx) and n(1)) ===
+    double dn_i_dx_0 = (n_i(1) - n_i(m_Nx)) * inv_2dx;
+    double left_term_ion_0 = m_params.gamma_i / m_params.n_i0 * dn_i_dx_0 * (1 + m_params.gamma_i * n_i(0) / m_params.n_i0);
+    double right_term_ion_0 = -2 * m_params.gamma_i * n_i(0) * dn_i_dx_0 / (m_params.n_i0 * m_params.n_i0);
+    m_grad_P_i(0) = m_params.P_i0 / m_params.n_i0 * (left_term_ion_0 + right_term_ion_0);
+    
+    double dn_e_dx_0 = (n_e(1) - n_e(m_Nx)) * inv_2dx;
+    double left_term_electron_0 = m_params.gamma_e / m_params.n_e0 * dn_e_dx_0 * (1 + m_params.gamma_e * n_e(0) / m_params.n_e0);
+    double right_term_electron_0 = -2 * m_params.gamma_e * n_e(0) * dn_e_dx_0 / (m_params.n_e0 * m_params.n_e0);
+    m_grad_P_e(0) = m_params.P_e0 / m_params.n_e0 * (left_term_electron_0 + right_term_electron_0);
+    
+    // === Boundary conditions at i = m_Nx (using periodic: n(Nx-1) and n(0)) ===
+    double dn_i_dx_Nx = (n_i(0) - n_i(m_Nx - 1)) * inv_2dx;
+    double left_term_ion_Nx = m_params.gamma_i / m_params.n_i0 * dn_i_dx_Nx * (1 + m_params.gamma_i * n_i(m_Nx) / m_params.n_i0);
+    double right_term_ion_Nx = -2 * m_params.gamma_i * n_i(m_Nx) * dn_i_dx_Nx / (m_params.n_i0 * m_params.n_i0);
+    m_grad_P_i(m_Nx) = m_params.P_i0 / m_params.n_i0 * (left_term_ion_Nx + right_term_ion_Nx);
+    
+    double dn_e_dx_Nx = (n_e(0) - n_e(m_Nx - 1)) * inv_2dx;
+    double left_term_electron_Nx = m_params.gamma_e / m_params.n_e0 * dn_e_dx_Nx * (1 + m_params.gamma_e * n_e(m_Nx) / m_params.n_e0);
+    double right_term_electron_Nx = -2 * m_params.gamma_e * n_e(m_Nx) * dn_e_dx_Nx / (m_params.n_e0 * m_params.n_e0);
+    m_grad_P_e(m_Nx) = m_params.P_e0 / m_params.n_e0 * (left_term_electron_Nx + right_term_electron_Nx);
 }
 
 void PlasmaSystem::step_euler() {
@@ -154,17 +218,9 @@ void PlasmaSystem::step_euler() {
     
     // === STAGE 1: Predictor (forward Euler) ===
     minmod(m_n_i1, m_n_e1, m_u_i1, m_u_e1);
-    
-    // Compute MUSCL reconstruction and numerical fluxes (vectorized)
     MUSCL_reconstruction_all(m_n_i1, m_n_e1, m_u_i1, m_u_e1);
     calc_fluxes_all();
-    
-    // Vectorized density update: dn/dt = -d(nu)/dx
-    m_n_i_star.segment(1, N) = m_n_i1.segment(1, N).array() 
-                             - dt_dx * (m_F_i_n.segment(1, N) - m_F_i_n.segment(0, N)).array();
-    m_n_e_star.segment(1, N) = m_n_e1.segment(1, N).array() 
-                             - dt_dx * (m_F_e_n.segment(1, N) - m_F_e_n.segment(0, N)).array();
-    
+
     // Compute pressure gradients (vectorized)
     calc_pressure_gradients(m_n_i1, m_n_e1);
     
