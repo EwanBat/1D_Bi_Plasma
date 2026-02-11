@@ -21,7 +21,7 @@ int main() {
     
     // Time domain
     double t0 = 0.0;              // Start time [s]
-    double tf = 1e-7;             // End time [s]
+    double tf = 3e-7;             // End time [s] We observe the space charge effect at 1e-7 s
     double dt_data = 1e-9;        // Data saving interval [s]
     
     std::cout << "=== Simulation Parameters ===" << std::endl;
