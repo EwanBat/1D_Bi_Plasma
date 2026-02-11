@@ -166,10 +166,12 @@ def fourier_analysis():
 
     plt.figure(figsize=(10, 6))
     extent = [k[0], k[-1], omega[0], omega[-1]]
-    plt.imshow(magnitude, extent=extent, aspect='auto', origin='lower', cmap='inferno', norm = matplotlib.colors.LogNorm())
+    plt.imshow(magnitude, extent=extent, aspect='auto', origin='lower', cmap='inferno', norm=matplotlib.colors.LogNorm())
     plt.colorbar(label='Magnitude')
     plt.xlabel('Wavenumber k [rad/m]')
     plt.ylabel('Frequency ω [rad/s]')
+    plt.xscale('symlog')
+    plt.yscale('symlog')
     plt.title('Fourier Transform')
     plt.tight_layout()
     plt.savefig("../image/fourier_analysis.png", dpi=150)
@@ -177,5 +179,5 @@ def fourier_analysis():
 
 if __name__ == "__main__":
     plot_time_evolution()
-    animate_time_evolution()
     fourier_analysis()
+    animate_time_evolution()

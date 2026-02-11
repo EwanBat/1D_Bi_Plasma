@@ -69,7 +69,12 @@ private:
 
     // Temporary storage vectors to avoid repeated allocations
     Eigen::VectorXd m_Phi, m_Phi_star;        // Electric potential [V]
-    Eigen::VectorXd m_E_star;               // Electric field at predictor step [V/m] 
+    Eigen::VectorXd m_E_star;               // Electric field at predictor step [V/m]
+
+    // Poisson solver matrix (precomputed for efficiency)
+    Eigen::MatrixXd m_A;                    // Coefficient matrix for Poisson equation
+    Eigen::ColPivHouseholderQR<Eigen::MatrixXd> m_poisson_solver; // LU decomposition for Poisson solver
+    Eigen::VectorXd m_rho;                  // Charge density vector for Poisson solver
 
 public:
     /**
@@ -115,6 +120,19 @@ public:
         // Initialize pressure gradient vectors
         m_grad_P_i.resize(m_Nx+1); m_grad_P_i.setZero();
         m_grad_P_e.resize(m_Nx+1); m_grad_P_e.setZero();
+
+        // Precompute Poisson solver matrix for efficiency
+        m_A = Eigen::MatrixXd::Zero(m_Nx + 1, m_Nx + 1);
+        for (int i = 1; i <= m_Nx - 1; ++i) {
+            m_A(i, i-1) = 1.0;
+            m_A(i, i)   = -2.0;
+            m_A(i, i+1) = 1.0;
+        }
+        // Mirror BC
+        m_A(0, 0) = -2.0; m_A(0, 1) = 1.0; m_A(0, m_Nx) = 1.0; // Left boundary
+        m_A(m_Nx, 0) = 1.0; m_A(m_Nx, m_Nx-1) = 1.0; m_A(m_Nx, m_Nx) = -2.0; // Right boundary
+        m_poisson_solver.compute(m_A);
+        m_rho.resize(m_Nx+1); m_rho.setZero();
 
         // Compute initial time step based on CFL condition
         compute_time_step();

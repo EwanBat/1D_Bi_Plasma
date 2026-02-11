@@ -10,7 +10,7 @@ int main() {
     // Spatial domain
     double x0 = 0.0;              // Start position [m]
     double xf = 1e-1;              // End position [m]
-    int Nx = 150;                 // Number of spatial points
+    int Nx = 200;                 // Number of spatial points
     double dx = (xf - x0) / (Nx + 1);
     
     // Spatial grid
@@ -21,8 +21,8 @@ int main() {
     
     // Time domain
     double t0 = 0.0;              // Start time [s]
-    double tf = 5e-8;             // End time [s]
-    double dt_data = 1e-10;        // Data saving interval [s]
+    double tf = 1e-7;             // End time [s]
+    double dt_data = 1e-9;        // Data saving interval [s]
     
     std::cout << "=== Simulation Parameters ===" << std::endl;
     std::cout << "Spatial domain: [" << x0 << ", " << xf << "] m" << std::endl;

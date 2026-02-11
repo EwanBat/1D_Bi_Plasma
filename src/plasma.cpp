@@ -2,23 +2,8 @@
 #include "Eigen/src/Core/Matrix.h"
 
 void PlasmaSystem::calc_potential(Eigen::VectorXd& n_i, Eigen::VectorXd& n_e, Eigen::VectorXd& Phi_out) {
-    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(m_Nx + 1, m_Nx + 1);
-    Eigen::VectorXd rho = (m_params.q_i * n_i + m_params.q_e * n_e) / m_params.epsilon_0;
-    Eigen::VectorXd b = - rho * m_dx * m_dx;
-
-    // Interior points: standard second-order finite difference stencil
-    for (int i = 1; i <= m_Nx - 1; ++i) {
-        A(i, i-1) = 1.0;
-        A(i, i)   = -2.0;
-        A(i, i+1) = 1.0;
-        // b(i) already set as -rho*dx^2
-    }
-    // Mirror BC
-    A(0, 0) = -2.0; A(0, 1) = 1.0; A(0, m_Nx) = 1.0; // Left boundary
-    A(m_Nx, 0) = 1.0; A(m_Nx, m_Nx-1) = 1.0; A(m_Nx, m_Nx) = -2.0; // Right boundary
-
-    // Solve linear system using QR decomposition
-    Phi_out = A.colPivHouseholderQr().solve(b);
+    m_rho = -(m_params.q_i * n_i + m_params.q_e * n_e) / m_params.epsilon_0 * m_dx * m_dx;
+    Phi_out = m_poisson_solver.solve(m_rho);
 }
 
 void PlasmaSystem::calc_electric_field(Eigen::VectorXd& Phi_in, Eigen::VectorXd& E_out) {
