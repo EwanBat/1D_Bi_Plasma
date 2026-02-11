@@ -223,6 +223,12 @@ void PlasmaSystem::step_euler() {
 
     // Compute pressure gradients (vectorized)
     calc_pressure_gradients(m_n_i1, m_n_e1);
+
+    m_n_i_star.segment(1, N) = m_n_i1.segment(1, N).array() 
+                              - dt_dx * (m_F_i_n.segment(1, N) - m_F_i_n.segment(0, N)).array();
+    m_n_e_star.segment(1, N) = m_n_e1.segment(1, N).array() 
+                              - dt_dx * (m_F_e_n.segment(1, N) - m_F_e_n.segment(0, N)).array();
+    
     
     // Vectorized velocity update: du/dt = -d(u²/2)/dx - dP/dx/m
     m_u_i_star.segment(1, N) = m_u_i1.segment(1, N).array() 
